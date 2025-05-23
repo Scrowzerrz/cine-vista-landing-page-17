@@ -174,37 +174,6 @@ const Index = () => {
                 />
               </div>
             </motion.div>
-
-            {/* Stats Section */}
-            <motion.div variants={sectionVariants} className="relative">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-                {[
-                  { number: "10K+", label: "Filmes" },
-                  { number: "5K+", label: "Séries" },
-                  { number: "50K+", label: "Usuários" },
-                  { number: "4K", label: "Qualidade" }
-                ].map((stat, index) => (
-                  <motion.div
-                    key={stat.label}
-                    initial={{ opacity: 0, scale: 0.8 }}
-                    whileInView={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileHover={{ scale: 1.05 }}
-                    className="text-center p-6 bg-gradient-to-br from-gray-900/80 to-black/80 backdrop-blur-sm rounded-2xl border border-gray-800/50 hover:border-red-500/30 transition-all duration-300"
-                  >
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 + 0.2 }}
-                      className="text-3xl font-bold bg-gradient-to-r from-red-500 to-red-600 bg-clip-text text-transparent mb-2"
-                    >
-                      {stat.number}
-                    </motion.div>
-                    <div className="text-gray-400 font-medium">{stat.label}</div>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
           </div>
         </motion.div>
       </main>
