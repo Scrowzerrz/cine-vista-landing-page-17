@@ -11,23 +11,31 @@ interface ContentItem {
   image: string;
   quality: string;
   type: string;
+  contentType?: 'movie' | 'tvshow'; // Added contentType to determine the route
 }
 
 interface ContentCarouselWrapperProps {
   title: string;
   data: ContentItem[];
   categories: string[];
+  contentType?: 'movie' | 'tvshow'; // Default will be 'movie' if not specified
 }
 
 const ContentCarouselWrapper: React.FC<ContentCarouselWrapperProps> = ({ 
-  title, data, categories 
+  title, data, categories, contentType = 'movie'
 }) => {
+  // Add contentType to each item if not already present
+  const enrichedData = data.map(item => ({
+    ...item,
+    contentType: item.contentType || contentType
+  }));
+
   return (
     <div className="relative w-full py-4">
       <div className="bg-gradient-to-r from-gray-900/40 via-gray-800/20 to-gray-900/40 backdrop-blur-sm rounded-xl p-6">
         <ContentCarousel 
           title={title} 
-          data={data}
+          data={enrichedData}
           categories={categories}
           renderItem={(item) => (
             <ContentCard
@@ -39,6 +47,7 @@ const ContentCarouselWrapper: React.FC<ContentCarouselWrapperProps> = ({
               image={item.image}
               quality={item.quality}
               type={item.type}
+              contentType={item.contentType}
             />
           )}
         />

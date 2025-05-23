@@ -12,15 +12,16 @@ interface ContentCardProps {
   image: string;
   quality: string;
   type: string;
+  contentType?: 'movie' | 'tvshow';
 }
 
 const ContentCard: React.FC<ContentCardProps> = ({ 
-  id, title, year, duration, image, quality, type 
+  id, title, year, duration, image, quality, type, contentType = 'movie'
 }) => {
   const navigate = useNavigate();
   
   const handleClick = () => {
-    navigate(`/movie/${id}`);
+    navigate(`/${contentType}/${id}`);
   };
   
   return (
@@ -43,6 +44,12 @@ const ContentCard: React.FC<ContentCardProps> = ({
         <div className="absolute top-3 left-3">
           <Badge className="bg-blue-600/90 hover:bg-blue-600 text-xs border-0 font-medium px-2.5 py-1">{type}</Badge>
         </div>
+        
+        {contentType === 'tvshow' && (
+          <div className="absolute bottom-3 right-3">
+            <Badge className="bg-purple-600/90 hover:bg-purple-600 text-xs border-0 font-medium px-2.5 py-1">SÉRIE</Badge>
+          </div>
+        )}
         
         {/* Hover Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end">
