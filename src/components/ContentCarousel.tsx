@@ -55,10 +55,10 @@ const ContentCarousel: React.FC<ContentCarouselProps> = ({ title, data, categori
             <button
               key={index}
               onClick={() => setActiveCategory(index)}
-              className={`text-xs sm:text-sm px-3 py-1.5 sm:px-4 sm:py-2 rounded-full font-medium transition-all duration-300 whitespace-nowrap shadow-sm ${
+              className={`text-xs sm:text-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full transition-all duration-300 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 ${
                 activeCategory === index
-                  ? 'bg-red-600 text-white ring-2 ring-red-400'
-                  : 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:text-white'
+                  ? 'bg-red-500 text-white font-semibold shadow-lg hover:bg-red-600' // Active state - inspired by image
+                  : 'bg-slate-800 text-slate-300 hover:bg-slate-700 hover:text-white font-medium' // Inactive state - inspired by image
               }`}
             >
               {category}
