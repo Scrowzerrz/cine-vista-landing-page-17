@@ -1,87 +1,21 @@
 
 import React from 'react';
+import { useQuery } from '@tanstack/react-query';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
 import ContentCarouselWrapper from '../components/ContentCarouselWrapper';
 import Footer from '../components/Footer';
+import { getHomePageMovies } from '@/services/homeService';
 
 const Index = () => {
-  const moviesData = [
-    {
-      id: 1,
-      title: "Missão: Impossível - O Acerto Final Parte Um",
-      year: "2023",
-      duration: "163min",
-      image: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYUkEgdZe.jpg",
-      quality: "FULLHD",
-      type: "DUB",
-      contentType: "movie" as "movie"  // Explicitly cast as the literal type
-    },
-    {
-      id: 2,
-      title: "Elementos",
-      year: "2023",
-      duration: "102min",
-      image: "https://image.tmdb.org/t/p/w500/6oH378gE7vSoRvHwKqfS_OjkSj2.jpg",
-      quality: "HD",
-      type: "LEG",
-      contentType: "movie" as "movie"
-    },
-    {
-      id: 3,
-      title: "Velozes & Furiosos 10",
-      year: "2023",
-      duration: "141min",
-      image: "https://image.tmdb.org/t/p/w500/wXNihLltMCGR7Xep3fSo7Y0VvDk.jpg",
-      quality: "FULLHD",
-      type: "DUB",
-      contentType: "movie" as "movie"
-    },
-    {
-      id: 4,
-      title: "Guardiões da Galáxia: Volume 3",
-      year: "2023",
-      duration: "150min",
-      image: "https://image.tmdb.org/t/p/w500/mgFdvrwlzM6xRaPAFYiVj3G7ou4.jpg",
-      quality: "4K",
-      type: "DUB",
-      contentType: "movie" as "movie"
-    },
-    {
-      id: 5,
-      title: "Homem-Aranha: Através do Aranhaverso",
-      year: "2023",
-      duration: "140min",
-      image: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
-      quality: "FULLHD",
-      type: "LEG",
-      contentType: "movie" as "movie"
-    },
-     {
-      id: 6,
-      title: "Oppenheimer",
-      year: "2023",
-      duration: "180min",
-      image: "https://image.tmdb.org/t/p/w500/c0DCmfLh6Lh3SRs372GN7b0EHaC.jpg",
-      quality: "4K",
-      type: "DUB",
-      contentType: "movie" as "movie"
-    },
-    {
-      id: 7,
-      title: "Barbie",
-      year: "2023",
-      duration: "114min",
-      image: "https://image.tmdb.org/t/p/w500/yRRuLt7sMB0xOSjBlwPNOo50G56.jpg",
-      quality: "FULLHD",
-      type: "LEG",
-      contentType: "movie" as "movie"
-    },
-  ];
+  const { data: moviesData = [], isLoading: isLoadingMovies } = useQuery({
+    queryKey: ['homePageMovies'],
+    queryFn: getHomePageMovies
+  });
 
   const seriesData = [
     {
-      id: 1,
+      id: "1",
       title: "The Last of Us",
       year: "2023",
       duration: "S1 E9",
@@ -91,7 +25,7 @@ const Index = () => {
       contentType: "tvshow" as "tvshow"  // Explicitly cast as the literal type
     },
     {
-      id: 2,
+      id: "2",
       title: "Wandinha",
       year: "2022",
       duration: "S1 E8",
@@ -101,7 +35,7 @@ const Index = () => {
       contentType: "tvshow" as "tvshow"
     },
     {
-      id: 3,
+      id: "3",
       title: "The Mandalorian",
       year: "2023",
       duration: "S3 E8",
@@ -111,7 +45,7 @@ const Index = () => {
       contentType: "tvshow" as "tvshow"
     },
     {
-      id: 4,
+      id: "4",
       title: "Succession",
       year: "2023",
       duration: "S4 E10",
@@ -121,7 +55,7 @@ const Index = () => {
       contentType: "tvshow" as "tvshow"
     },
     {
-      id: 5,
+      id: "5",
       title: "Loki",
       year: "2023",
       duration: "S2 E6",
@@ -131,7 +65,7 @@ const Index = () => {
       contentType: "tvshow" as "tvshow"
     },
     {
-      id: 6,
+      id: "6",
       title: "Ahsoka",
       year: "2023",
       duration: "S1 E8",
@@ -141,7 +75,7 @@ const Index = () => {
       contentType: "tvshow" as "tvshow"
     },
     {
-      id: 7,
+      id: "7",
       title: "Gen V",
       year: "2023",
       duration: "S1 E8",
@@ -159,12 +93,18 @@ const Index = () => {
         <HeroSection />
         
         <div className="container mx-auto px-4 py-12 space-y-12 max-w-7xl"> 
-          <ContentCarouselWrapper 
-            title="Filmes" 
-            data={moviesData}
-            categories={["LANÇAMENTOS", "MAIS VISTOS", "EM ALTA", "RECOMENDADOS"]}
-            contentType="movie"
-          />
+          {isLoadingMovies ? (
+            <div className="h-64 flex items-center justify-center">
+              <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+            </div>
+          ) : (
+            <ContentCarouselWrapper 
+              title="Filmes" 
+              data={moviesData}
+              categories={["LANÇAMENTOS", "MAIS VISTOS", "EM ALTA", "RECOMENDADOS"]}
+              contentType="movie"
+            />
+          )}
           
           <ContentCarouselWrapper 
             title="Séries" 

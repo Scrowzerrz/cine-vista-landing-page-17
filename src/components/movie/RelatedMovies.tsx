@@ -28,6 +28,8 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
   
+  if (movies.length === 0) return null;
+  
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}

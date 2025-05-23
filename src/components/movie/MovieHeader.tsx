@@ -4,20 +4,14 @@ import { Play, ListPlus, Share, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
+import { MovieWithRelations } from '@/types/movie';
 
 interface MovieHeaderProps {
-  movie: {
-    title: string;
-    originalTitle: string;
-    poster: string;
-    year: string;
-    duration: string;
-    rating: string;
-    quality: string;
-  };
+  movie: MovieWithRelations;
+  onPlayClick: () => void;
 }
 
-const MovieHeader: React.FC<MovieHeaderProps> = ({ movie }) => {
+const MovieHeader: React.FC<MovieHeaderProps> = ({ movie, onPlayClick }) => {
   return (
     <motion.div 
       initial={{ opacity: 0, y: 20 }}
@@ -65,7 +59,9 @@ const MovieHeader: React.FC<MovieHeaderProps> = ({ movie }) => {
             >
               {movie.title}
             </motion.h1>
-            <p className="text-gray-400 text-sm md:text-base italic">{movie.originalTitle}</p>
+            {movie.original_title && (
+              <p className="text-gray-400 text-sm md:text-base italic">{movie.original_title}</p>
+            )}
           </div>
           
           <div className="flex items-center space-x-4 bg-gray-800/60 backdrop-blur-md rounded-xl p-3 shadow-lg w-fit">
@@ -83,6 +79,7 @@ const MovieHeader: React.FC<MovieHeaderProps> = ({ movie }) => {
           <div className="flex flex-wrap gap-4 mt-2">
             <Button 
               className="bg-red-600 hover:bg-red-700 text-white rounded-xl px-6 py-6 h-auto shadow-lg shadow-red-600/30 hover:shadow-red-600/50 transition-all duration-300 transform hover:scale-105"
+              onClick={onPlayClick}
             >
               <Play className="mr-2 h-5 w-5" fill="white" /> 
               <span>ASSISTIR AGORA</span>

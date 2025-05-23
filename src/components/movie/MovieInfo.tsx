@@ -3,21 +3,19 @@ import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { FileText, Users, Film, User, Clock, Calendar, Star } from 'lucide-react';
+import { MovieWithRelations } from '@/types/movie';
 
 interface MovieInfoProps {
-  movie: {
-    plot: string;
-    categories: string[];
-    director: string;
-    cast: string[];
-    producer: string;
-    year: string;
-    duration: string;
-    rating: string;
-  };
+  movie: MovieWithRelations;
 }
 
 const MovieInfo: React.FC<MovieInfoProps> = ({ movie }) => {
+  // Extraindo nomes dos relacionamentos para exibição
+  const categoryNames = movie.categories?.map(cat => cat.name) || [];
+  const directorNames = movie.directors?.map(dir => dir.name) || [];
+  const producerNames = movie.producers?.map(prod => prod.name) || [];
+  const actorNames = movie.actors?.map(act => act.name) || [];
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -71,7 +69,7 @@ const MovieInfo: React.FC<MovieInfoProps> = ({ movie }) => {
           Categorias
         </h3>
         <div className="flex flex-wrap gap-2 mb-8 ml-7">
-          {movie.categories.map((category) => (
+          {categoryNames.map((category) => (
             <Badge 
               key={category} 
               className="bg-gray-900/70 hover:bg-gray-800 text-white border-gray-700/50 px-4 py-2 rounded-xl shadow-md text-sm hover:shadow-lg transition-all duration-200"
@@ -87,23 +85,23 @@ const MovieInfo: React.FC<MovieInfoProps> = ({ movie }) => {
         <div className="backdrop-blur-sm bg-gray-900/50 p-5 rounded-2xl border border-gray-700/30 hover:border-gray-600/70 transition-colors shadow-lg hover:shadow-xl group">
           <h4 className="text-gray-400 text-sm mb-3 flex items-center">
             <User className="w-5 h-5 text-red-500 mr-2 group-hover:text-red-400 transition-colors" />
-            <span>Diretor:</span>
+            <span>Diretor{directorNames.length > 1 ? 'es' : ''}:</span>
           </h4>
-          <p className="text-white font-medium ml-7">{movie.director}</p>
+          <p className="text-white font-medium ml-7">{directorNames.join(", ") || "Não informado"}</p>
         </div>
         <div className="backdrop-blur-sm bg-gray-900/50 p-5 rounded-2xl border border-gray-700/30 hover:border-gray-600/70 transition-colors shadow-lg hover:shadow-xl group">
           <h4 className="text-gray-400 text-sm mb-3 flex items-center">
             <Users className="w-5 h-5 text-red-500 mr-2 group-hover:text-red-400 transition-colors" />
             <span>Elenco:</span>
           </h4>
-          <p className="text-white font-medium ml-7">{movie.cast.join(", ")}</p>
+          <p className="text-white font-medium ml-7">{actorNames.join(", ") || "Não informado"}</p>
         </div>
         <div className="md:col-span-2 backdrop-blur-sm bg-gray-900/50 p-5 rounded-2xl border border-gray-700/30 hover:border-gray-600/70 transition-colors shadow-lg hover:shadow-xl group">
           <h4 className="text-gray-400 text-sm mb-3 flex items-center">
             <Film className="w-5 h-5 text-red-500 mr-2 group-hover:text-red-400 transition-colors" />
-            <span>Produtor:</span>
+            <span>Produtor{producerNames.length > 1 ? 'es' : ''}:</span>
           </h4>
-          <p className="text-white font-medium ml-7">{movie.producer}</p>
+          <p className="text-white font-medium ml-7">{producerNames.join(", ") || "Não informado"}</p>
         </div>
       </div>
     </motion.div>

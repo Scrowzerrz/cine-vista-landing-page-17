@@ -9,6 +9,246 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      actors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      directors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      movie_actors: {
+        Row: {
+          actor_id: string
+          movie_id: string
+        }
+        Insert: {
+          actor_id: string
+          movie_id: string
+        }
+        Update: {
+          actor_id?: string
+          movie_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_actors_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "actors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_actors_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movie_categories: {
+        Row: {
+          category_id: string
+          movie_id: string
+        }
+        Insert: {
+          category_id: string
+          movie_id: string
+        }
+        Update: {
+          category_id?: string
+          movie_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_categories_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movie_directors: {
+        Row: {
+          director_id: string
+          movie_id: string
+        }
+        Insert: {
+          director_id: string
+          movie_id: string
+        }
+        Update: {
+          director_id?: string
+          movie_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_directors_director_id_fkey"
+            columns: ["director_id"]
+            isOneToOne: false
+            referencedRelation: "directors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_directors_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movie_producers: {
+        Row: {
+          movie_id: string
+          producer_id: string
+        }
+        Insert: {
+          movie_id: string
+          producer_id: string
+        }
+        Update: {
+          movie_id?: string
+          producer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "movie_producers_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "movie_producers_producer_id_fkey"
+            columns: ["producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      movies: {
+        Row: {
+          backdrop: string
+          created_at: string
+          duration: string
+          id: string
+          original_title: string | null
+          player_url: string
+          plot: string
+          poster: string
+          quality: string
+          rating: string
+          title: string
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          backdrop: string
+          created_at?: string
+          duration: string
+          id?: string
+          original_title?: string | null
+          player_url: string
+          plot: string
+          poster: string
+          quality: string
+          rating: string
+          title: string
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          backdrop?: string
+          created_at?: string
+          duration?: string
+          id?: string
+          original_title?: string | null
+          player_url?: string
+          plot?: string
+          poster?: string
+          quality?: string
+          rating?: string
+          title?: string
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
+      }
+      producers: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -32,6 +272,36 @@ export type Database = {
           username?: string | null
         }
         Relationships: []
+      }
+      related_movies: {
+        Row: {
+          movie_id: string
+          related_movie_id: string
+        }
+        Insert: {
+          movie_id: string
+          related_movie_id: string
+        }
+        Update: {
+          movie_id?: string
+          related_movie_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "related_movies_movie_id_fkey"
+            columns: ["movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "related_movies_related_movie_id_fkey"
+            columns: ["related_movie_id"]
+            isOneToOne: false
+            referencedRelation: "movies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

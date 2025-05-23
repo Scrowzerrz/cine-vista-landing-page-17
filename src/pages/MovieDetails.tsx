@@ -1,86 +1,61 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import MovieHeader from '@/components/movie/MovieHeader';
 import MovieInfo from '@/components/movie/MovieInfo';
 import RelatedMovies from '@/components/movie/RelatedMovies';
 import Comments from '@/components/movie/Comments';
-import { motion } from 'framer-motion';
+import { getMovieById } from '@/services/movieService';
+import { MovieWithRelations } from '@/types/movie';
+import MoviePlayer from '@/components/movie/MoviePlayer';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
+  const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  
+  const { data: movie, isLoading, error } = useQuery({
+    queryKey: ['movie', id],
+    queryFn: () => getMovieById(id || ''),
+    enabled: !!id,
+  });
   
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [id]);
-  
-  // Simulação de dados de filme (em produção, isso viria de uma API ou Supabase)
-  const movie = {
-    id: id || '1',
-    title: 'MISSÃO: IMPOSSÍVEL - O ACERTO FINAL',
-    originalTitle: 'Mission: Impossible - The Final Reckoning',
-    year: '2023',
-    duration: '169min',
-    rating: '7.7',
-    poster: 'https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYUkEgdZe.jpg',
-    backdrop: 'https://image.tmdb.org/t/p/original/628Dep6AxEtDxjZoGP78TsOxYbK.jpg',
-    quality: 'CAM',
-    categories: ['Ação', 'Aventura', 'Suspense'],
-    director: 'Christopher McQuarrie',
-    cast: ['Tom Cruise', 'Hayley Atwell', 'Ving Rhames', 'Simon Pegg', 'Esai Morales'],
-    producer: 'Paramount Pictures, Skydance Media, TC Productions',
-    plot: 'Depois de escapar de um acidente de trem calamitoso, Ethan percebe que a entidade está escondida a bordo de um antigo submarino russo, mas um inimigo do seu passado está determinado a garantir que, desta vez, Ethan não interferirá nos seus planos.',
-  };
 
-  const relatedMovies = [
-    {
-      id: '2',
-      title: '007: Nunca Mais Outra Vez',
-      year: '1983',
-      duration: '134min',
-      image: 'https://image.tmdb.org/t/p/w500/wBpN7dIZpL5xLva0qH6DYzXjBdI.jpg',
-      quality: 'HD',
-      type: 'LEG'
-    },
-    {
-      id: '3',
-      title: 'O Banqueiro',
-      year: '2020',
-      duration: '120min',
-      image: 'https://image.tmdb.org/t/p/w500/biznhvfediHgKi5zH3lOoS8ASXL.jpg',
-      quality: 'HD',
-      type: 'DUB'
-    },
-    {
-      id: '4',
-      title: 'John Wick 3: Parabellum',
-      year: '2019',
-      duration: '130min',
-      image: 'https://image.tmdb.org/t/p/w500/mOoERCQCGrgFHOrco7wLy0mDoAX.jpg',
-      quality: 'HD',
-      type: 'DUB'
-    },
-    {
-      id: '5',
-      title: 'Amor e Monstros',
-      year: '2020',
-      duration: '109min',
-      image: 'https://image.tmdb.org/t/p/w500/hnz5wRqeYKlugGbC7RZxC7DAiED.jpg',
-      quality: 'HD',
-      type: 'DUB'
-    },
-    {
-      id: '6',
-      title: 'Os Pequenos Vestígios',
-      year: '2021',
-      duration: '128min',
-      image: 'https://image.tmdb.org/t/p/w500/98UFAKFPUOIzF91Q0j0W7vR4ikV.jpg',
-      quality: 'HD',
-      type: 'DUB'
-    }
-  ];
+  if (isLoading) {
+    return (
+      <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+      </div>
+    );
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Filme não encontrado</h2>
+          <p>Desculpe, não conseguimos encontrar o filme que você está procurando.</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Prepare related movies data for the RelatedMovies component
+  const relatedMoviesFormatted = movie.related_movies?.map(relatedMovie => ({
+    id: relatedMovie.id,
+    title: relatedMovie.title,
+    year: relatedMovie.year,
+    duration: relatedMovie.duration,
+    image: relatedMovie.poster,
+    quality: relatedMovie.quality,
+    type: 'DUB', // Fixo por enquanto, poderia vir do banco em uma implementação futura
+  })) || [];
 
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white selection:bg-red-500 selection:text-white">
@@ -97,13 +72,15 @@ const MovieDetails = () => {
             backgroundPosition: '50% 0%',
           }}
         >
-          {/* Improved gradient overlay for better text visibility and smoother transition */}
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/30 via-gray-900/70 to-gray-950 backdrop-blur-[2px]"></div>
           <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 to-transparent"></div>
           <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-950 to-transparent"></div>
           
           <div className="relative container mx-auto px-4 h-full flex items-end pb-16">
-            <MovieHeader movie={movie} />
+            <MovieHeader 
+              movie={movie} 
+              onPlayClick={() => setIsPlayerOpen(true)} 
+            />
           </div>
         </div>
         
@@ -115,9 +92,17 @@ const MovieDetails = () => {
             </div>
             
             {/* Related Movies */}
-            <div>
-              <RelatedMovies movies={relatedMovies} />
-            </div>
+            {relatedMoviesFormatted.length > 0 && (
+              <div>
+                <motion.div 
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.3 }}
+                >
+                  <RelatedMovies movies={relatedMoviesFormatted} />
+                </motion.div>
+              </div>
+            )}
             
             {/* Comments Section */}
             <div>
@@ -133,6 +118,14 @@ const MovieDetails = () => {
           </div>
         </div>
       </main>
+      
+      {/* Movie Player Modal */}
+      <MoviePlayer 
+        open={isPlayerOpen}
+        onClose={() => setIsPlayerOpen(false)}
+        playerUrl={movie.player_url}
+        title={movie.title}
+      />
       
       <Footer />
     </div>
