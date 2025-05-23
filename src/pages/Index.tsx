@@ -139,23 +139,23 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white selection:bg-red-500 selection:text-white">
+    <div className="min-h-screen bg-black/95 text-white selection:bg-red-500 selection:text-white">
       <Navbar />
       <main>
         <HeroSection />
-        <div className="px-4 md:px-8 lg:px-16 py-8 md:py-12"> 
+        
+        <div className="container mx-auto px-4 py-12 space-y-12 max-w-7xl"> 
           <ContentCarouselWrapper 
             title="Filmes" 
             data={moviesData}
             categories={["LANÇAMENTOS", "MAIS VISTOS", "EM ALTA", "RECOMENDADOS"]}
           />
-          <div className="my-8 md:my-12"> 
-            <ContentCarouselWrapper 
-              title="Séries" 
-              data={seriesData}
-              categories={["NOVOS EPISÓDIOS", "MAIS VISTAS", "EM ALTA", "RECOMENDADAS"]}
-            />
-          </div>
+          
+          <ContentCarouselWrapper 
+            title="Séries" 
+            data={seriesData}
+            categories={["NOVOS EPISÓDIOS", "MAIS VISTAS", "EM ALTA", "RECOMENDADAS"]}
+          />
         </div>
       </main>
       <Footer />
