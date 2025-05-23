@@ -14,7 +14,6 @@ const TVShowDetails = () => {
   const [selectedSeason, setSelectedSeason] = useState("1");
   const [isLoading, setIsLoading] = useState(true);
   const [expandedEpisodes, setExpandedEpisodes] = useState<Record<string, boolean>>({});
-  const [activeTab, setActiveTab] = useState("overview");
   
   // Simulação do carregamento da página
   useEffect(() => {
@@ -33,20 +32,6 @@ const TVShowDetails = () => {
     }));
   };
   
-  // Function to scroll to episodes section
-  const scrollToEpisodes = () => {
-    setActiveTab("episodes");
-    setTimeout(() => {
-      const episodesSection = document.getElementById("episodes-section");
-      if (episodesSection) {
-        episodesSection.scrollIntoView({ 
-          behavior: "smooth", 
-          block: "start" 
-        });
-      }
-    }, 100);
-  };
-
   // Simulação de dados da série (em produção, isso viria de uma API ou Supabase)
   const tvshow = {
     id: id || '1',
@@ -172,49 +157,43 @@ const TVShowDetails = () => {
       <main className="pt-16">
         {/* Show Background with Gradient Overlay */}
         <div 
-          className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center bg-fixed transition-all duration-700"
+          className="relative w-full h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center bg-fixed transition-all duration-700"
           style={{ 
             backgroundImage: `url(${tvshow.backdrop})`, 
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/80 to-gray-950"></div>
           
-          <div className="relative container mx-auto px-4 h-full flex items-end pb-8 sm:pb-16">
-            <TVShowHeader tvshow={tvshow} onWatchClick={scrollToEpisodes} />
+          <div className="relative container mx-auto px-4 h-full flex items-end pb-16">
+            <TVShowHeader tvshow={tvshow} />
           </div>
         </div>
         
-        <div className="container mx-auto px-4 py-8 sm:py-12">
-          <div className="grid grid-cols-1 gap-8 sm:gap-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+            <div className="lg:col-span-3">
               {/* TV Show Info */}
-              <TVShowInfo tvshow={tvshow} activeTab={activeTab} setActiveTab={setActiveTab} />
+              <TVShowInfo tvshow={tvshow} />
               
               {/* Seasons and Episodes */}
-              <div id="episodes-section">
-                <SeasonsAndEpisodes 
-                  seasons={tvshow.seasons}
-                  selectedSeason={selectedSeason}
-                  setSelectedSeason={setSelectedSeason}
-                  expandedEpisodes={expandedEpisodes}
-                  toggleExpandEpisodes={toggleExpandEpisodes}
-                />
-              </div>
+              <SeasonsAndEpisodes 
+                seasons={tvshow.seasons}
+                selectedSeason={selectedSeason}
+                setSelectedSeason={setSelectedSeason}
+                expandedEpisodes={expandedEpisodes}
+                toggleExpandEpisodes={toggleExpandEpisodes}
+              />
               
               {/* Related TV Shows */}
-              <div className="mt-8 sm:mt-12">
+              <div className="mt-12">
                 <RelatedShows shows={relatedShows} />
               </div>
               
               {/* Comments Section */}
-              <div className="mt-8 sm:mt-12">
+              <div className="mt-12">
                 <Comments />
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </main>
