@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
@@ -11,6 +11,10 @@ import { motion } from 'framer-motion';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
+  
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [id]);
   
   // Simulação de dados de filme (em produção, isso viria de uma API ou Supabase)
   const movie = {
@@ -28,12 +32,6 @@ const MovieDetails = () => {
     cast: ['Tom Cruise', 'Hayley Atwell', 'Ving Rhames', 'Simon Pegg', 'Esai Morales'],
     producer: 'Paramount Pictures, Skydance Media, TC Productions',
     plot: 'Depois de escapar de um acidente de trem calamitoso, Ethan percebe que a entidade está escondida a bordo de um antigo submarino russo, mas um inimigo do seu passado está determinado a garantir que, desta vez, Ethan não interferirá nos seus planos.',
-    links: [
-      { label: 'Assistir Mission: Impossible - O Acerto Final Online Dublado', type: 'DUB' },
-      { label: 'Assistir Mission: Impossible - O Acerto Final Online Legendado', type: 'LEG' },
-      { label: 'Assistir Mission: Impossible - O Acerto Final Online em HD', type: 'HD' },
-      { label: 'Assistir Mission: Impossible - O Acerto Final Online Grátis', type: 'FREE' },
-    ]
   };
 
   const relatedMovies = [
@@ -91,37 +89,37 @@ const MovieDetails = () => {
       <main className="pt-16">
         {/* Movie Background with Gradient Overlay */}
         <div 
-          className="relative w-full h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center bg-fixed transition-all duration-700"
+          className="relative w-full h-[500px] md:h-[600px] lg:h-[80vh] bg-cover bg-center bg-fixed transition-all duration-700"
           style={{ 
             backgroundImage: `url(${movie.backdrop})`, 
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/80 to-gray-950"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/70 to-gray-950"></div>
           
-          <div className="relative container mx-auto px-4 h-full flex items-end pb-12">
+          <div className="relative container mx-auto px-4 h-full flex items-end pb-16">
             <MovieHeader movie={movie} />
           </div>
         </div>
         
         <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 gap-10">
+          <div className="grid grid-cols-1 gap-12">
             <div>
               {/* Movie Info */}
               <MovieInfo movie={movie} />
             </div>
             
             {/* Related Movies */}
-            <div className="mt-8">
+            <div>
               <RelatedMovies movies={relatedMovies} />
             </div>
             
             {/* Comments Section */}
-            <div className="mt-8">
+            <div>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.4 }}
-                className="backdrop-blur-sm bg-gray-800/30 rounded-xl border border-gray-700/50 p-6 shadow-lg"
+                className="backdrop-blur-sm bg-gray-800/40 rounded-3xl border border-gray-700/50 p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300"
               >
                 <Comments />
               </motion.div>
