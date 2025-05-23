@@ -15,7 +15,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYUkEgdZe.jpg",
       quality: "FULLHD",
       type: "DUB",
-      contentType: "movie"
+      contentType: "movie" as "movie"  // Explicitly cast as the literal type
     },
     {
       id: 2,
@@ -25,7 +25,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/6oH378gE7vSoRvHwKqfS_OjkSj2.jpg",
       quality: "HD",
       type: "LEG",
-      contentType: "movie"
+      contentType: "movie" as "movie"
     },
     {
       id: 3,
@@ -35,7 +35,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/wXNihLltMCGR7Xep3fSo7Y0VvDk.jpg",
       quality: "FULLHD",
       type: "DUB",
-      contentType: "movie"
+      contentType: "movie" as "movie"
     },
     {
       id: 4,
@@ -45,7 +45,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/mgFdvrwlzM6xRaPAFYiVj3G7ou4.jpg",
       quality: "4K",
       type: "DUB",
-      contentType: "movie"
+      contentType: "movie" as "movie"
     },
     {
       id: 5,
@@ -55,7 +55,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
       quality: "FULLHD",
       type: "LEG",
-      contentType: "movie"
+      contentType: "movie" as "movie"
     },
      {
       id: 6,
@@ -65,7 +65,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/c0DCmfLh6Lh3SRs372GN7b0EHaC.jpg",
       quality: "4K",
       type: "DUB",
-      contentType: "movie"
+      contentType: "movie" as "movie"
     },
     {
       id: 7,
@@ -75,7 +75,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/yRRuLt7sMB0xOSjBlwPNOo50G56.jpg",
       quality: "FULLHD",
       type: "LEG",
-      contentType: "movie"
+      contentType: "movie" as "movie"
     },
   ];
 
@@ -88,7 +88,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7tKqQR.jpg",
       quality: "4K",
       type: "DUB",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"  // Explicitly cast as the literal type
     },
     {
       id: 2,
@@ -98,7 +98,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/ooBR3q49rorFe72OiAyH3W9Xhcb.jpg",
       quality: "FULLHD",
       type: "DUB",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"
     },
     {
       id: 3,
@@ -108,7 +108,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg",
       quality: "4K",
       type: "LEG",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"
     },
     {
       id: 4,
@@ -118,7 +118,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/x5tY3UEKSeS7K2EML0zJcR0aN2r.jpg",
       quality: "FULLHD",
       type: "LEG",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"
     },
     {
       id: 5,
@@ -128,7 +128,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/voHU2TwK2x355TzT5v3QvfC54g.jpg",
       quality: "4K",
       type: "DUB",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"
     },
     {
       id: 6,
@@ -138,7 +138,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/laN1B5S4FX8b99Vd6n272YOvzo9.jpg",
       quality: "FULLHD",
       type: "DUB",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"
     },
     {
       id: 7,
@@ -148,7 +148,7 @@ const Index = () => {
       image: "https://image.tmdb.org/t/p/w500/sH32Tf9UBxM2Q0adq2jP0nPU27q.jpg",
       quality: "4K",
       type: "LEG",
-      contentType: "tvshow"
+      contentType: "tvshow" as "tvshow"
     }
   ];
 
