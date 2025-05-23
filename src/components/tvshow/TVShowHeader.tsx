@@ -39,7 +39,7 @@ const TVShowHeader: React.FC<TVShowHeaderProps> = ({ tvshow }) => {
         transition={{ duration: 0.6 }}
         className="flex-shrink-0"
       >
-        <div className="relative rounded-2xl overflow-hidden shadow-2xl w-56 h-80 md:w-64 md:h-96 border-2 border-gray-700/50 hover:border-red-500/80 transition-all duration-300 transform hover:scale-[1.02] group">
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl w-56 h-80 md:w-64 md:h-96 border-2 border-gray-700/50 hover:border-red-500/80 transition-all duration-300 transform hover:scale-[1.02] group">
           <img
             src={tvshow.poster}
             alt={tvshow.title}
@@ -104,7 +104,7 @@ const TVShowHeader: React.FC<TVShowHeaderProps> = ({ tvshow }) => {
             transition={{ delay: 0.6, duration: 0.4 }}
             className="flex flex-wrap gap-3 pt-2"
           >
-            <Button className="bg-red-600 hover:bg-red-700 text-white py-6 px-8 rounded-full shadow-xl transform hover:translate-y-[-2px] transition-all hover:shadow-red-500/30 hover:shadow-2xl border border-red-500/20">
+            <Button className="bg-red-600 hover:bg-red-700 text-white py-6 px-8 rounded-full shadow-xl transform hover:-translate-y-1 transition-all hover:shadow-red-500/30 hover:shadow-2xl border border-red-500/20">
               <Play className="mr-2 h-5 w-5" fill="white" /> 
               <span className="font-bold tracking-wide">ASSISTIR AGORA</span>
             </Button>

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -10,14 +11,16 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Play, Clock, ChevronDown } from 'lucide-react';
+import { Play, Clock, ChevronDown, ChevronRight, ArrowRight, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Switch } from '@/components/ui/switch';
 
 const TVShowDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedSeason, setSelectedSeason] = useState("1");
   const [isLoading, setIsLoading] = useState(true);
+  const [expandedEpisodes, setExpandedEpisodes] = useState<Record<string, boolean>>({});
   
   // Simulação do carregamento da página
   useEffect(() => {
@@ -27,6 +30,14 @@ const TVShowDetails = () => {
     
     return () => clearTimeout(timer);
   }, []);
+
+  // Toggle expanded episodes state
+  const toggleExpandEpisodes = (seasonNumber: string) => {
+    setExpandedEpisodes(prev => ({
+      ...prev,
+      [seasonNumber]: !prev[seasonNumber]
+    }));
+  };
   
   // Simulação de dados da série (em produção, isso viria de uma API ou Supabase)
   const tvshow = {
@@ -148,7 +159,12 @@ const TVShowDetails = () => {
 
   const currentSeason = tvshow.seasons.find(season => season.number.toString() === selectedSeason) || tvshow.seasons[0];
 
-  // Animação para cards de episódios
+  // Display only first 2 episodes when not expanded
+  const displayedEpisodes = expandedEpisodes[selectedSeason] 
+    ? currentSeason.episodes 
+    : currentSeason.episodes.slice(0, 2);
+
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
@@ -196,25 +212,25 @@ const TVShowDetails = () => {
               {/* TV Show Info */}
               <TVShowInfo tvshow={tvshow} />
               
-              {/* Seasons and Episodes - Redesigned */}
+              {/* Seasons and Episodes - Completely Redesigned */}
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="mt-12 bg-gray-900/30 backdrop-blur-md p-10 rounded-3xl border border-gray-700/30 shadow-2xl"
+                className="mt-12 bg-gray-900/60 backdrop-blur-lg p-8 rounded-[2rem] border border-gray-700/50 shadow-[0_0_45px_-15px_rgba(0,0,0,0.5)]"
               >
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
                   <h3 className="text-3xl font-bold flex items-center">
-                    <div className="mr-4 p-2 bg-red-600 rounded-xl">
+                    <div className="mr-4 p-2 bg-red-600 rounded-xl shadow-lg shadow-red-500/20">
                       <Play className="h-6 w-6" fill="white" />
                     </div>
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-300">Temporadas e Episódios</span>
+                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-gray-300">Temporadas e Episódios</span>
                   </h3>
                   <motion.div 
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4, duration: 0.4 }}
-                    className="bg-gray-800/70 backdrop-blur-sm px-4 py-2 rounded-xl border border-gray-700/50 shadow-lg"
+                    className="bg-gray-800/70 backdrop-blur-sm px-4 py-2.5 rounded-xl border border-gray-700/50 shadow-lg"
                   >
                     <p className="text-gray-300 font-medium">
                       <span className="text-red-400 font-semibold">{tvshow.seasons.length}</span> Temporadas • <span className="text-red-400 font-semibold">{
@@ -224,122 +240,195 @@ const TVShowDetails = () => {
                   </motion.div>
                 </div>
                 
-                <Tabs value={selectedSeason} onValueChange={setSelectedSeason} className="w-full">
-                  <div className="relative">
-                    <ScrollArea className="w-full overflow-visible">
-                      <TabsList className="mb-10 w-full flex flex-nowrap justify-start bg-gray-800/40 p-2 gap-2 rounded-2xl border border-gray-700/30 shadow-inner">
-                        {tvshow.seasons.map((season) => (
-                          <TabsTrigger 
-                            key={season.number} 
-                            value={season.number.toString()}
-                            className="rounded-xl px-6 py-3.5 whitespace-nowrap flex-shrink-0 transition-all duration-300
-                            data-[state=active]:bg-red-600/90 data-[state=active]:text-white data-[state=active]:shadow-2xl
-                            data-[state=active]:shadow-red-600/20 data-[state=inactive]:bg-gray-800/80 
-                            data-[state=inactive]:hover:bg-gray-700/70 font-bold tracking-wide"
-                          >
-                            Temporada {season.number}
-                          </TabsTrigger>
-                        ))}
-                      </TabsList>
-                    </ScrollArea>
+                {/* Redesigned Season Selector */}
+                <div className="relative mb-12 border-b border-gray-700/40 pb-2">
+                  <div className="flex items-center justify-between">
+                    <motion.h4 
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      className="text-lg font-semibold text-gray-200 mb-4"
+                    >
+                      Selecionar Temporada
+                    </motion.h4>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, transition: { delay: 0.3 } }}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-400">Temporada {selectedSeason}</span>
+                        <Switch 
+                          className="data-[state=checked]:bg-red-600" 
+                          onCheckedChange={() => {
+                            const nextSeason = (parseInt(selectedSeason) % tvshow.seasons.length) + 1;
+                            setSelectedSeason(nextSeason.toString());
+                          }}
+                        />
+                      </div>
+                    </motion.div>
                   </div>
                   
-                  {tvshow.seasons.map((season) => (
-                    <TabsContent key={season.number} value={season.number.toString()} className="mt-0 focus-visible:outline-none focus-visible:ring-0">
-                      <motion.div 
-                        initial={{ opacity: 0 }}
-                        animate={{ 
-                          opacity: 1,
-                          transition: { duration: 0.4 } 
-                        }}
-                        className="p-6 bg-gray-800/40 rounded-2xl border border-gray-700/40 mb-8"
+                  <ScrollArea className="w-full pb-4">
+                    <div className="flex gap-2 pb-2">
+                      {tvshow.seasons.map((season) => (
+                        <Button
+                          key={season.number}
+                          variant="outline"
+                          onClick={() => setSelectedSeason(season.number.toString())}
+                          className={`px-4 py-2 rounded-xl transition-all duration-300 ${
+                            selectedSeason === season.number.toString() 
+                              ? 'bg-red-600 text-white border-red-500 shadow-lg shadow-red-500/20' 
+                              : 'bg-gray-800/80 border-gray-700/50 text-gray-300 hover:border-red-500/50'
+                          }`}
+                        >
+                          <span className="font-medium">{season.number}</span>
+                        </Button>
+                      ))}
+                    </div>
+                  </ScrollArea>
+                </div>
+                
+                {/* Current Season Info */}
+                <motion.div
+                  key={selectedSeason}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="mb-8 px-4 py-5 bg-gradient-to-r from-gray-800/80 to-gray-800/40 rounded-2xl border border-gray-700/40"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                      <div className="h-14 w-14 flex items-center justify-center bg-gradient-to-br from-red-500 to-red-700 text-white rounded-2xl shadow-xl">
+                        <span className="font-bold text-xl">{currentSeason.number}</span>
+                      </div>
+                      <div>
+                        <h3 className="text-xl font-bold text-white">Temporada {currentSeason.number}</h3>
+                        <p className="text-sm text-gray-300">
+                          {currentSeason.year} • {currentSeason.episodes.length} episódios
+                        </p>
+                      </div>
+                    </div>
+                    <Badge className="bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold rounded-xl shadow-lg">
+                      {currentSeason.year}
+                    </Badge>
+                  </div>
+                </motion.div>
+                
+                {/* Episode Cards - Completely Redesigned */}
+                <AnimatePresence>
+                  <motion.div 
+                    key={selectedSeason}
+                    variants={containerVariants}
+                    initial="hidden"
+                    animate="visible"
+                    className="space-y-6"
+                  >
+                    {displayedEpisodes.map((episode) => (
+                      <motion.div
+                        key={episode.number}
+                        variants={cardVariants}
+                        className="overflow-hidden rounded-3xl border border-gray-700/30 transition-all duration-300 hover:border-red-500/50 shadow-lg hover:shadow-red-900/10 hover:shadow-xl group"
                       >
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                          <div className="flex items-center gap-4">
-                            <div className="h-12 w-12 flex items-center justify-center bg-red-600 text-white rounded-xl shadow-xl">
-                              <span className="font-bold text-xl">{season.number}</span>
-                            </div>
-                            <div>
-                              <h3 className="text-xl font-bold text-white">Temporada {season.number}</h3>
-                              <p className="text-sm text-gray-300">{season.year} • {season.episodes.length} episódios</p>
-                            </div>
+                        <div className="relative w-full h-[300px] md:h-[320px] overflow-hidden">
+                          {/* Episode Image with Blurred Background */}
+                          <div className="absolute inset-0 overflow-hidden">
+                            <img 
+                              src={episode.image} 
+                              alt={episode.title}
+                              className="w-full h-full object-cover blur-md scale-110 brightness-50"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-gray-900/90 via-gray-900/70 to-gray-900/60"></div>
                           </div>
-                          <Badge className="bg-red-600 hover:bg-red-700 px-4 py-2 text-sm font-semibold rounded-lg shadow-lg">
-                            {season.year}
-                          </Badge>
-                        </div>
-                      </motion.div>
-                      
-                      <motion.div 
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="visible"
-                        className="space-y-5"
-                      >
-                        {season.episodes.map((episode) => (
-                          <motion.div
-                            key={episode.number}
-                            variants={cardVariants}
-                            className="bg-gradient-to-r from-gray-800/70 to-gray-800/40 border border-gray-700/30 rounded-2xl overflow-hidden hover:border-red-600/50 transition-all duration-300 shadow-lg hover:shadow-red-900/10 hover:shadow-xl group"
-                          >
-                            <Collapsible className="w-full overflow-hidden">
-                              <div className="flex flex-col md:flex-row">
-                                <div className="md:w-52 h-32 md:h-auto relative overflow-hidden group-hover:brightness-110">
-                                  <img 
-                                    src={episode.image} 
-                                    alt={episode.title}
-                                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
-                                  />
-                                  <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent transition-opacity duration-300 flex items-center justify-center">
-                                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                                      <Button variant="default" size="sm" className="bg-red-600/90 hover:bg-red-700 rounded-full h-12 w-12 flex items-center justify-center shadow-xl">
-                                        <Play className="h-5 w-5" fill="white" />
-                                      </Button>
-                                    </div>
-                                  </div>
+                          
+                          {/* Episode Content */}
+                          <div className="relative h-full flex flex-col md:flex-row p-6">
+                            <div className="md:w-[45%] h-52 md:h-full overflow-hidden rounded-2xl shadow-xl relative group mb-4 md:mb-0 flex-shrink-0">
+                              <img 
+                                src={episode.image} 
+                                alt={episode.title}
+                                className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-60"></div>
+                              <div className="absolute top-4 left-4">
+                                <Badge className="bg-red-600/90 hover:bg-red-600 text-white px-2.5 py-1 rounded-lg shadow-lg">
+                                  EP {episode.number}
+                                </Badge>
+                              </div>
+                              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                                <Button variant="default" className="bg-red-600/90 hover:bg-red-700 rounded-full h-16 w-16 flex items-center justify-center shadow-xl">
+                                  <Play className="h-8 w-8" fill="white" />
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="md:pl-6 flex flex-col justify-between flex-grow">
+                              <div>
+                                <h4 className="font-bold text-xl md:text-2xl text-white tracking-tight mb-2">{episode.title}</h4>
+                                <div className="flex items-center gap-4 mb-4">
+                                  <span className="flex items-center gap-1.5 text-gray-300">
+                                    <Clock className="w-4 h-4 text-red-400" /> {episode.runtime}
+                                  </span>
                                 </div>
-                                <div className="flex flex-col md:flex-row items-start md:items-center justify-between p-5 pt-5 w-full">
-                                  <div className="flex-grow">
-                                    <div className="flex items-center gap-3 mb-2">
-                                      <Badge className="bg-red-600 hover:bg-red-700 px-3 py-1 text-sm rounded-lg">{episode.number}</Badge>
-                                      <h4 className="font-semibold text-lg text-white tracking-tight">{episode.title}</h4>
+                                
+                                <Collapsible className="w-full">
+                                  <CollapsibleContent className="animate-accordion-down mt-2">
+                                    <div className="p-4 rounded-xl bg-gray-800/70 border border-gray-700/50 backdrop-blur-sm shadow-inner">
+                                      <p className="text-gray-300 text-sm leading-relaxed">{episode.overview}</p>
                                     </div>
-                                    <div className="flex items-center text-sm text-gray-300 gap-4">
-                                      <span className="flex items-center gap-1.5">
-                                        <Clock className="w-4 h-4 text-gray-400" /> {episode.runtime}
-                                      </span>
-                                    </div>
-                                    
-                                    <CollapsibleTrigger className="text-sm text-red-400 hover:text-red-300 mt-3 flex items-center gap-2 cursor-pointer transition-colors border-none focus:border-none focus:outline-none">
-                                      <span className="text-sm font-medium">Ver detalhes</span>
-                                      <ChevronDown className="h-4 w-4 text-red-400 transition-transform duration-200 ui-open:rotate-180" />
-                                    </CollapsibleTrigger>
-                                  </div>
+                                  </CollapsibleContent>
                                   
-                                  <Button size="lg" className="mt-4 md:mt-0 bg-red-600 hover:bg-red-700 rounded-full px-6 py-5 transform transition-all duration-300 hover:shadow-lg hover:shadow-red-600/20 hover:translate-y-[-2px]">
-                                    <Play className="w-5 h-5 mr-2" fill="white" /> Assistir
-                                  </Button>
-                                </div>
+                                  <CollapsibleTrigger className="mt-2 inline-flex items-center px-3 py-1.5 bg-gray-800/60 hover:bg-gray-800/90 backdrop-blur-sm text-sm text-gray-300 hover:text-white rounded-lg border border-gray-700/50 transition-all duration-200 cursor-pointer group">
+                                    <span className="group-hover:text-red-400 transition-colors">Ver detalhes</span>
+                                    <ChevronDown className="ml-1.5 h-4 w-4 text-gray-400 group-hover:text-red-400 transition-transform duration-200 ui-open:rotate-180" />
+                                  </CollapsibleTrigger>
+                                </Collapsible>
                               </div>
                               
-                              <CollapsibleContent className="animate-accordion-down">
-                                <div className="px-5 pb-6 pt-0">
-                                  <div className="p-5 rounded-xl bg-gray-800/50 border border-gray-700/50 shadow-inner">
-                                    <h5 className="text-sm font-medium text-gray-200 mb-3">Sinopse:</h5>
-                                    <p className="text-gray-300 text-sm leading-relaxed">{episode.overview}</p>
-                                  </div>
-                                </div>
-                              </CollapsibleContent>
-                            </Collapsible>
-                          </motion.div>
-                        ))}
+                              <div className="mt-4 flex justify-between items-center">
+                                <Badge className="bg-gray-800/80 text-gray-300 border border-gray-700/50 px-2 py-1 rounded-md">
+                                  {episode.runtime}
+                                </Badge>
+                                <Button size="sm" className="bg-red-600 hover:bg-red-700 text-white rounded-xl transform transition-all duration-300 hover:translate-y-[-2px]">
+                                  <Play className="w-4 h-4 mr-1" fill="white" /> Assistir
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
                       </motion.div>
-                    </TabsContent>
-                  ))}
-                </Tabs>
+                    ))}
+                    
+                    {/* Show More/Less Episodes Button */}
+                    {currentSeason.episodes.length > 2 && (
+                      <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        className="flex justify-center pt-2"
+                      >
+                        <Button
+                          onClick={() => toggleExpandEpisodes(selectedSeason)}
+                          variant="outline"
+                          className="border-gray-700/50 hover:border-red-500/70 bg-gray-800/40 hover:bg-gray-800/70 text-gray-300 hover:text-white rounded-full py-6 px-8 transition-all group"
+                        >
+                          {expandedEpisodes[selectedSeason] ? (
+                            <>
+                              <span className="font-medium">Ver menos</span>
+                              <ChevronDown className="ml-2 h-4 w-4 transition-transform group-hover:-translate-y-1" />
+                            </>
+                          ) : (
+                            <>
+                              <span className="font-medium">Ver todos os {currentSeason.episodes.length} episódios</span>
+                              <Eye className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />
+                            </>
+                          )}
+                        </Button>
+                      </motion.div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
               </motion.div>
               
-              {/* Related TV Shows - Kept but redesigned */}
+              {/* Related TV Shows */}
               <div className="mt-12">
                 <RelatedShows shows={relatedShows} />
               </div>
