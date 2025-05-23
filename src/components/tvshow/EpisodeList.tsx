@@ -64,7 +64,7 @@ const EpisodeList: React.FC<EpisodeListProps> = ({
         )}
       </motion.div>
 
-      <AnimatePresence mode="wait">
+      <AnimatePresence>
         <motion.div 
           key={selectedSeason}
           variants={containerVariants}
