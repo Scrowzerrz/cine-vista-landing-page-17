@@ -2,7 +2,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, FilmIcon } from 'lucide-react';
+import { ChevronLeft, ChevronRight, FilmIcon, Play } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 
@@ -46,7 +46,7 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
           <Button 
             variant="outline" 
             size="icon" 
-            className="border-gray-600 bg-gray-900/50 hover:bg-red-600 transition-colors rounded-full w-10 h-10 shadow-lg"
+            className="border-gray-600 bg-gray-800/70 hover:bg-red-600 transition-colors rounded-full w-10 h-10 shadow-lg"
           >
             <ChevronLeft className="h-5 w-5" />
             <span className="sr-only">Página anterior</span>
@@ -54,7 +54,7 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
           <Button 
             variant="outline" 
             size="icon" 
-            className="border-gray-600 bg-gray-900/50 hover:bg-red-600 transition-colors rounded-full w-10 h-10 shadow-lg"
+            className="border-gray-600 bg-gray-800/70 hover:bg-red-600 transition-colors rounded-full w-10 h-10 shadow-lg"
           >
             <ChevronRight className="h-5 w-5" />
             <span className="sr-only">Próxima página</span>
@@ -72,7 +72,7 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
             className="relative group cursor-pointer"
             onClick={() => handleMovieClick(movie.id)}
           >
-            <div className="relative overflow-hidden rounded-2xl bg-gray-800 shadow-md hover:shadow-2xl transition-all duration-300 h-full">
+            <div className="relative overflow-hidden rounded-2xl bg-gray-800 border border-gray-700/30 hover:border-red-500/50 shadow-lg hover:shadow-red-600/20 transition-all duration-300 h-full">
               <div className="aspect-[2/3] overflow-hidden">
                 <img 
                   src={movie.image}
@@ -85,16 +85,14 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
               
               <div className="absolute top-3 left-3">
                 <Badge 
-                  variant="outline" 
-                  className="text-xs bg-blue-600/80 text-blue-50 border-0 rounded-full px-2.5 py-0.5 shadow-lg"
+                  className="text-xs bg-blue-600/90 text-blue-50 border-0 rounded-full px-2.5 py-0.5 shadow-lg"
                 >
                   {movie.type}
                 </Badge>
               </div>
               <div className="absolute top-3 right-3">
                 <Badge 
-                  variant="outline" 
-                  className="text-xs bg-red-600/80 text-gray-100 border-0 rounded-full px-2.5 py-0.5 shadow-lg"
+                  className="text-xs bg-red-600/90 text-gray-100 border-0 rounded-full px-2.5 py-0.5 shadow-lg"
                 >
                   {movie.quality}
                 </Badge>
@@ -110,8 +108,8 @@ const RelatedMovies: React.FC<RelatedMoviesProps> = ({ movies }) => {
               </div>
               
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                <div className="w-12 h-12 bg-red-600/90 rounded-full flex items-center justify-center shadow-xl transform scale-0 group-hover:scale-100 transition-transform duration-300">
-                  <ChevronRight className="h-6 w-6 text-white" />
+                <div className="w-14 h-14 bg-red-600 rounded-full flex items-center justify-center shadow-xl transform scale-0 group-hover:scale-100 transition-transform duration-300">
+                  <Play className="h-7 w-7 text-white" fill="white" />
                 </div>
               </div>
             </div>

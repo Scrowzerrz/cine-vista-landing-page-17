@@ -70,19 +70,22 @@ const MovieHeader: React.FC<MovieHeaderProps> = ({ movie }) => {
               <Play className="mr-2 h-5 w-5" fill="white" /> 
               <span>ASSISTIR AGORA</span>
             </Button>
+            
+            {/* Fixed buttons with proper styling */}
             <Button 
               variant="outline" 
-              className="border-gray-600 hover:bg-gray-700/50 text-white rounded-xl px-5 py-6 h-auto backdrop-blur-sm hover:border-white/50 transition-all duration-300 transform hover:scale-105"
+              className="border border-gray-600 bg-gray-800/50 hover:bg-gray-700 text-white rounded-xl px-5 py-6 h-auto shadow-md hover:shadow-lg transition-all duration-300"
             >
               <ListPlus className="mr-2 h-5 w-5" /> 
-              Minha Lista
+              <span>Minha Lista</span>
             </Button>
+            
             <Button 
               variant="outline" 
-              className="border-gray-600 hover:bg-gray-700/50 text-white rounded-xl px-5 py-6 h-auto backdrop-blur-sm hover:border-white/50 transition-all duration-300 transform hover:scale-105"
+              className="border border-gray-600 bg-gray-800/50 hover:bg-gray-700 text-white rounded-xl px-5 py-6 h-auto shadow-md hover:shadow-lg transition-all duration-300"
             >
               <Share className="mr-2 h-5 w-5" /> 
-              Compartilhar
+              <span>Compartilhar</span>
             </Button>
           </div>
         </div>
