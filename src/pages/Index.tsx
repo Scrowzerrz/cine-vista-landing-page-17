@@ -5,7 +5,6 @@ import { motion } from 'framer-motion';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
 import ContentCarouselWrapper from '../components/ContentCarouselWrapper';
-import MovieCategories from '../components/MovieCategories';
 import Footer from '../components/Footer';
 import { getHomePageMovies } from '@/services/homeService';
 
@@ -133,14 +132,6 @@ const Index = () => {
           </div>
 
           <div className="container mx-auto px-4 py-16 space-y-16 max-w-7xl relative">
-            {/* Categories Section */}
-            <motion.div variants={sectionVariants} className="relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-blue-500/5 rounded-3xl blur-xl"></div>
-              <div className="relative backdrop-blur-sm bg-black/20 rounded-3xl border border-gray-800/50 p-8 shadow-2xl">
-                <MovieCategories />
-              </div>
-            </motion.div>
-
             {/* Movies Section */}
             <motion.div variants={sectionVariants} className="relative">
               <div className="absolute inset-0 bg-gradient-to-r from-red-500/5 via-transparent to-red-500/5 rounded-3xl blur-xl"></div>
