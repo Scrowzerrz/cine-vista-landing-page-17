@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -15,6 +14,7 @@ const TVShowDetails = () => {
   const [selectedSeason, setSelectedSeason] = useState("1");
   const [isLoading, setIsLoading] = useState(true);
   const [expandedEpisodes, setExpandedEpisodes] = useState<Record<string, boolean>>({});
+  const [activeTab, setActiveTab] = useState("overview");
   
   // Simulação do carregamento da página
   useEffect(() => {
@@ -33,6 +33,20 @@ const TVShowDetails = () => {
     }));
   };
   
+  // Function to scroll to episodes section
+  const scrollToEpisodes = () => {
+    setActiveTab("episodes");
+    setTimeout(() => {
+      const episodesSection = document.getElementById("episodes-section");
+      if (episodesSection) {
+        episodesSection.scrollIntoView({ 
+          behavior: "smooth", 
+          block: "start" 
+        });
+      }
+    }, 100);
+  };
+
   // Simulação de dados da série (em produção, isso viria de uma API ou Supabase)
   const tvshow = {
     id: id || '1',
@@ -166,7 +180,7 @@ const TVShowDetails = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/80 to-gray-950"></div>
           
           <div className="relative container mx-auto px-4 h-full flex items-end pb-8 sm:pb-16">
-            <TVShowHeader tvshow={tvshow} />
+            <TVShowHeader tvshow={tvshow} onWatchClick={scrollToEpisodes} />
           </div>
         </div>
         
@@ -178,16 +192,18 @@ const TVShowDetails = () => {
               transition={{ duration: 0.5 }}
             >
               {/* TV Show Info */}
-              <TVShowInfo tvshow={tvshow} />
+              <TVShowInfo tvshow={tvshow} activeTab={activeTab} setActiveTab={setActiveTab} />
               
               {/* Seasons and Episodes */}
-              <SeasonsAndEpisodes 
-                seasons={tvshow.seasons}
-                selectedSeason={selectedSeason}
-                setSelectedSeason={setSelectedSeason}
-                expandedEpisodes={expandedEpisodes}
-                toggleExpandEpisodes={toggleExpandEpisodes}
-              />
+              <div id="episodes-section">
+                <SeasonsAndEpisodes 
+                  seasons={tvshow.seasons}
+                  selectedSeason={selectedSeason}
+                  setSelectedSeason={setSelectedSeason}
+                  expandedEpisodes={expandedEpisodes}
+                  toggleExpandEpisodes={toggleExpandEpisodes}
+                />
+              </div>
               
               {/* Related TV Shows */}
               <div className="mt-8 sm:mt-12">
