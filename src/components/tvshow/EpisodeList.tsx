@@ -47,7 +47,7 @@ const EpisodeList: React.FC<EpisodeListProps> = ({
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        className="space-y-6"
+        className="space-y-4 sm:space-y-6"
       >
         {displayedEpisodes.map((episode) => (
           <EpisodeCard key={episode.number} episode={episode} />
@@ -64,7 +64,7 @@ const EpisodeList: React.FC<EpisodeListProps> = ({
             <Button
               onClick={() => toggleExpandEpisodes(selectedSeason)}
               variant="outline"
-              className="border-gray-700/50 hover:border-red-500/70 bg-gray-800/40 hover:bg-gray-800/70 text-gray-300 hover:text-white rounded-full py-6 px-8 transition-all group"
+              className="border-gray-700/50 hover:border-red-500/70 bg-gray-800/40 hover:bg-gray-800/70 text-gray-300 hover:text-white rounded-full py-4 sm:py-6 px-6 sm:px-8 transition-all group"
             >
               {expandedEpisodes[selectedSeason] ? (
                 <>
@@ -73,7 +73,7 @@ const EpisodeList: React.FC<EpisodeListProps> = ({
                 </>
               ) : (
                 <>
-                  <span className="font-medium">Ver todos os {episodes.length} episódios</span>
+                  <span className="font-medium text-sm sm:text-base">Ver todos os {episodes.length} episódios</span>
                   <Eye className="ml-2 h-4 w-4 transition-transform group-hover:scale-110" />
                 </>
               )}

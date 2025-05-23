@@ -22,12 +22,12 @@ const SeasonSelector: React.FC<SeasonSelectorProps> = ({
 }) => {
   return (
     <motion.div 
-      className="relative mb-12 border-b border-gray-700/40 pb-6"
+      className="relative mb-8 sm:mb-12 border-b border-gray-700/40 pb-4 sm:pb-6"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, delay: 0.2 }}
     >
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-5 gap-4">
         <motion.div 
           className="flex items-center gap-2"
           initial={{ opacity: 0, x: -20 }}
@@ -44,10 +44,10 @@ const SeasonSelector: React.FC<SeasonSelectorProps> = ({
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          className="bg-gray-800/70 backdrop-blur-sm border border-gray-700/50 rounded-full px-4 py-2 shadow-inner"
+          className="bg-gray-800/70 backdrop-blur-sm border border-gray-700/50 rounded-full px-3 sm:px-4 py-2 shadow-inner"
         >
-          <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-300">Temporada selecionada:</span>
+          <div className="flex items-center gap-2 sm:gap-3 text-sm">
+            <span className="text-gray-300">Temporada selecionada:</span>
             <div className="flex items-center gap-1.5">
               <span className="text-base font-semibold text-white">{selectedSeason}</span>
               <Switch 
@@ -89,7 +89,7 @@ const SeasonSelector: React.FC<SeasonSelectorProps> = ({
                 <Button
                   variant="outline"
                   onClick={() => setSelectedSeason(season.number.toString())}
-                  className={`relative px-5 py-6 rounded-xl transition-all duration-300 overflow-hidden ${
+                  className={`relative px-3 sm:px-5 py-4 sm:py-6 rounded-xl transition-all duration-300 overflow-hidden ${
                     selectedSeason === season.number.toString() 
                       ? 'bg-gradient-to-r from-red-600 to-red-700 border-red-500 text-white shadow-lg shadow-red-500/20' 
                       : 'bg-gray-800/80 border-gray-700/50 text-gray-300 hover:border-red-500/50'

@@ -35,20 +35,20 @@ const SeasonsAndEpisodes: React.FC<SeasonsAndEpisodesProps> = ({
   
   return (
     <motion.div 
-      className="mt-16"
+      className="mt-8 sm:mt-12 lg:mt-16"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.5 }}
     >
       <motion.h2 
-        className="text-2xl md:text-3xl font-bold mb-8 flex items-center"
+        className="text-xl sm:text-2xl md:text-3xl font-bold mb-6 sm:mb-8 flex items-center"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.5 }}
       >
         <motion.span 
-          className="inline-block w-1 h-8 bg-red-600 mr-3"
+          className="inline-block w-1 h-6 sm:h-8 bg-red-600 mr-2 sm:mr-3 rounded-full"
           initial={{ height: 0 }}
           animate={{ height: "2rem" }}
           transition={{ duration: 0.3, delay: 0.2 }}

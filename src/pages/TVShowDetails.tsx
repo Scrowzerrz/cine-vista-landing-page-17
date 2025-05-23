@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import Navbar from '@/components/Navbar';
@@ -157,21 +158,25 @@ const TVShowDetails = () => {
       <main className="pt-16">
         {/* Show Background with Gradient Overlay */}
         <div 
-          className="relative w-full h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center bg-fixed transition-all duration-700"
+          className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center bg-fixed transition-all duration-700"
           style={{ 
             backgroundImage: `url(${tvshow.backdrop})`, 
           }}
         >
           <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/80 to-gray-950"></div>
           
-          <div className="relative container mx-auto px-4 h-full flex items-end pb-16">
+          <div className="relative container mx-auto px-4 h-full flex items-end pb-8 sm:pb-16">
             <TVShowHeader tvshow={tvshow} />
           </div>
         </div>
         
-        <div className="container mx-auto px-4 py-12">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-            <div className="lg:col-span-3">
+        <div className="container mx-auto px-4 py-8 sm:py-12">
+          <div className="grid grid-cols-1 gap-8 sm:gap-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
               {/* TV Show Info */}
               <TVShowInfo tvshow={tvshow} />
               
@@ -185,15 +190,15 @@ const TVShowDetails = () => {
               />
               
               {/* Related TV Shows */}
-              <div className="mt-12">
+              <div className="mt-8 sm:mt-12">
                 <RelatedShows shows={relatedShows} />
               </div>
               
               {/* Comments Section */}
-              <div className="mt-12">
+              <div className="mt-8 sm:mt-12">
                 <Comments />
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </main>
