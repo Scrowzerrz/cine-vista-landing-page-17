@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Play, Plus, Share, Calendar, Star } from 'lucide-react';
+import { Play, Plus, Share, Calendar, Star, Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
@@ -32,69 +32,58 @@ const TVShowHeader: React.FC<TVShowHeaderProps> = ({ tvshow }) => {
   return (
     <div className="flex flex-col md:flex-row gap-8 w-full">
       {/* Show Poster */}
-      <div className="flex-shrink-0">
-        <div className="relative rounded-lg overflow-hidden shadow-2xl w-56 h-80 md:w-64 md:h-96 border-2 border-gray-700">
+      <div className="flex-shrink-0 animate-fade-in">
+        <div className="relative rounded-lg overflow-hidden shadow-2xl w-56 h-80 md:w-64 md:h-96 border-2 border-gray-700 hover:border-red-500 transition-all duration-300 transform hover:scale-[1.02] group">
           <img
             src={tvshow.poster}
             alt={tvshow.title}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover transition-all duration-500 group-hover:brightness-110"
           />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <div className="absolute top-2 left-2">
-            <Badge className="bg-blue-600 text-white font-medium">SÉRIE</Badge>
+            <Badge className="bg-blue-600 text-white font-medium px-2.5 py-1 rounded-md shadow-lg">SÉRIE</Badge>
           </div>
           <div className="absolute top-2 right-2">
-            <Badge className="bg-red-600 text-white font-medium">{tvshow.quality}</Badge>
+            <Badge className="bg-red-600 text-white font-medium px-2.5 py-1 rounded-md shadow-lg">{tvshow.quality}</Badge>
           </div>
         </div>
       </div>
       
       {/* Show Info */}
-      <div className="flex flex-col justify-end">
-        <div className="space-y-4">
+      <div className="flex flex-col justify-end animate-fade-in" style={{ animationDelay: '0.2s' }}>
+        <div className="space-y-6">
           <div className="space-y-1">
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold">{tvshow.title}</h1>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white tracking-tight">{tvshow.title}</h1>
             <p className="text-gray-400 text-sm md:text-base">{tvshow.originalTitle}</p>
           </div>
           
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <div className="flex items-center">
-              {[...Array(5)].map((_, index) => (
-                <svg 
-                  key={index}
-                  className={`w-4 h-4 ${index < Math.floor(parseFloat(tvshow.rating) / 2) ? 'text-yellow-400' : 'text-gray-600'}`}
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="currentColor"
-                  viewBox="0 0 22 20"
-                >
-                  <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"/>
-                </svg>
-              ))}
-              <span className="ml-2 text-gray-300">{tvshow.rating}/10</span>
+            <div className="flex items-center bg-gray-800/60 backdrop-blur-sm rounded-full px-3 py-1 shadow-md">
+              <Star className="h-4 w-4 text-yellow-400 mr-1 fill-yellow-400" />
+              <span className="font-medium text-yellow-50">{tvshow.rating}/10</span>
             </div>
-            <span className="text-gray-400">|</span>
-            <span className="flex items-center">
-              <Calendar className="w-4 h-4 mr-1" /> {tvshow.year}
-            </span>
-            <span className="text-gray-400">|</span>
-            <span>{tvshow.seasons.length} Temporadas</span>
-            <span className="text-gray-400">|</span>
-            <span>{totalEpisodes} Episódios</span>
+            <div className="flex items-center bg-gray-800/60 backdrop-blur-sm rounded-full px-3 py-1 shadow-md">
+              <Calendar className="w-4 h-4 mr-1 text-blue-400" /> 
+              <span className="text-blue-50">{tvshow.year}</span>
+            </div>
+            <div className="flex items-center bg-gray-800/60 backdrop-blur-sm rounded-full px-3 py-1 shadow-md">
+              <Info className="w-4 h-4 mr-1 text-purple-400" /> 
+              <span className="text-purple-50">{tvshow.seasons.length} Temporadas • {totalEpisodes} Episódios</span>
+            </div>
           </div>
           
           <div className="flex flex-wrap gap-3">
-            <Button className="bg-red-600 hover:bg-red-700 text-white">
-              <Play className="mr-2 h-4 w-4" /> 
-              <span>ASSISTIR</span>
-              <span className="hidden md:inline ml-1">Última temporada</span>
+            <Button className="bg-red-600 hover:bg-red-700 text-white py-6 px-6 rounded-full shadow-lg transform hover:translate-y-[-2px] transition-all hover:shadow-red-500/30 hover:shadow-xl">
+              <Play className="mr-2 h-5 w-5" fill="white" /> 
+              <span className="font-medium">ASSISTIR AGORA</span>
             </Button>
-            <Button variant="outline" className="border-gray-600 hover:bg-gray-700/50">
-              <Plus className="mr-2 h-4 w-4" /> 
-              Minha Lista
+            <Button variant="outline" className="border-gray-600 hover:bg-gray-700/80 py-6 px-6 rounded-full shadow-md transition-all hover:border-white hover:text-white">
+              <Plus className="mr-2 h-5 w-5" /> 
+              <span className="font-medium">MINHA LISTA</span>
             </Button>
-            <Button variant="outline" className="border-gray-600 hover:bg-gray-700/50">
-              <Share className="mr-2 h-4 w-4" /> 
-              Compartilhar
+            <Button variant="outline" className="border-gray-600 hover:bg-gray-700/80 py-6 px-6 rounded-full shadow-md transition-all hover:border-white hover:text-white">
+              <Share className="mr-2 h-5 w-5" /> 
+              <span className="font-medium">COMPARTILHAR</span>
             </Button>
           </div>
         </div>
