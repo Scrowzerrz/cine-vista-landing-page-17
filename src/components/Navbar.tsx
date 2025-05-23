@@ -1,50 +1,131 @@
 
 import React, { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, PlayIcon, MenuIcon, XIcon } from 'lucide-react'; // Adicionado MenuIcon e XIcon para mobile
+import { Button } from '@/components/ui/button';
 
 const Navbar = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  const navLinks = [
+    { href: "#", label: "Início", current: true },
+    { href: "#", label: "Filmes", dropdown: true },
+    { href: "#", label: "Séries", dropdown: true },
+    { href: "#", label: "Pedidos" },
+  ];
 
   return (
-    <nav className="bg-gray-900/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 px-4 md:px-8 lg:px-16 py-4">
-      <div className="flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-8">
-          <div className="text-2xl font-bold text-red-500">
-            POBREFLIX 
-            <span className="text-white ml-2">▶</span>
+    <nav className="bg-gray-900/90 backdrop-blur-md fixed top-0 left-0 right-0 z-50 shadow-lg">
+      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16 md:h-20">
+          {/* Logo and Desktop Navigation Links */}
+          <div className="flex items-center">
+            <div className="flex-shrink-0 flex items-center">
+              <PlayIcon className="h-7 w-7 text-red-500 mr-1.5" />
+              <span className="text-2xl md:text-3xl font-bold text-white">
+                POBRE<span className="text-red-500">FLIX</span>
+              </span>
+            </div>
+            
+            {/* Desktop Navigation Links */}
+            <div className="hidden md:ml-8 md:flex md:items-baseline md:space-x-6 lg:space-x-8">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-150 ${
+                    link.current
+                      ? 'text-white hover:text-red-400'
+                      : 'text-gray-300 hover:text-white hover:bg-gray-700/50'
+                  } ${link.dropdown ? 'flex items-center' : ''}`}
+                  aria-current={link.current ? 'page' : undefined}
+                >
+                  {link.label}
+                  {link.dropdown && <span className="ml-1 text-xs">▼</span>}
+                </a>
+              ))}
+            </div>
           </div>
-          
-          {/* Navigation Links */}
-          <div className="hidden md:flex items-center space-x-6">
-            <a href="#" className="text-white hover:text-red-400 transition-colors">Início</a>
-            <a href="#" className="text-gray-300 hover:text-white transition-colors flex items-center">
-              Filmes <span className="ml-1">▼</span>
-            </a>
-            <a href="#" className="text-gray-300 hover:text-white transition-colors flex items-center">
-              Séries <span className="ml-1">▼</span>
-            </a>
-            <a href="#" className="text-gray-300 hover:text-white transition-colors">Pedidos</a>
-          </div>
-        </div>
 
-        {/* Search and Register */}
-        <div className="flex items-center space-x-4">
-          <div className="hidden md:flex items-center bg-gray-800 rounded-lg px-3 py-2">
-            <input
-              type="text"
-              placeholder="Pesquisar..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="bg-transparent text-white placeholder-gray-400 outline-none w-48"
-            />
-            <Search className="w-5 h-5 text-gray-400 ml-2" />
+          {/* Search, Register Button (Desktop) and Mobile Menu Button */}
+          <div className="flex items-center">
+            <div className="hidden md:flex items-center bg-gray-800/70 rounded-lg px-3 py-1.5 mr-4 border border-gray-700 focus-within:border-red-500 transition-colors">
+              <Search className="w-4 h-4 text-gray-400 mr-2" />
+              <input
+                type="text"
+                placeholder="Pesquisar..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="bg-transparent text-white text-sm placeholder-gray-500 outline-none w-32 lg:w-48 transition-all duration-300 focus:w-40 lg:focus:w-56"
+              />
+            </div>
+            <div className="hidden md:block">
+              <Button 
+                variant="default" 
+                className="bg-red-600 hover:bg-red-700 text-white font-semibold text-sm px-4 py-2"
+              >
+                Registrar
+              </Button>
+            </div>
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="text-gray-300 hover:text-white hover:bg-gray-700/50"
+              >
+                {isMobileMenuOpen ? <XIcon className="h-6 w-6" /> : <MenuIcon className="h-6 w-6" />}
+              </Button>
+            </div>
           </div>
-          <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors">
-            Registrar
-          </button>
         </div>
       </div>
+
+      {/* Mobile menu, show/hide based on menu state. */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t border-gray-700">
+          <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+            {navLinks.map((link) => (
+              <a
+                key={`mobile-${link.label}`}
+                href={link.href}
+                className={`block px-3 py-2 rounded-md text-base font-medium transition-colors duration-150 ${
+                  link.current
+                    ? 'bg-gray-700 text-white'
+                    : 'text-gray-300 hover:text-white hover:bg-gray-700/80'
+                } ${link.dropdown ? 'flex items-center justify-between' : ''}`}
+                aria-current={link.current ? 'page' : undefined}
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {link.label}
+                {link.dropdown && <span className="ml-1 text-xs">▼</span>}
+              </a>
+            ))}
+             <div className="pt-2 pb-1 px-3">
+                <div className="flex items-center bg-gray-800/70 rounded-lg px-3 py-2 border border-gray-700 focus-within:border-red-500 transition-colors w-full">
+                <Search className="w-5 h-5 text-gray-400 mr-2" />
+                <input
+                    type="text"
+                    placeholder="Pesquisar..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="bg-transparent text-white text-sm placeholder-gray-500 outline-none w-full"
+                />
+                </div>
+            </div>
+            <div className="pt-2 pb-1 px-3">
+                <Button 
+                    variant="default" 
+                    className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold text-sm"
+                    onClick={() => setIsMobileMenuOpen(false)}
+                >
+                    Registrar
+                </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 };

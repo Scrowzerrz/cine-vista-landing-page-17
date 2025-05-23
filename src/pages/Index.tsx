@@ -9,115 +9,155 @@ const Index = () => {
   const moviesData = [
     {
       id: 1,
-      title: "Missão: Impossível - O Acerto Final",
-      year: "2025",
-      duration: "148min",
-      image: "https://images.unsplash.com/photo-1489599136344-8e46e56c0ee2?w=300&h=400&fit=crop",
-      quality: "LEG",
-      type: "CAM"
+      title: "Missão: Impossível - O Acerto Final Parte Um",
+      year: "2023",
+      duration: "163min",
+      image: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYUkEgdZe.jpg",
+      quality: "FULLHD",
+      type: "DUB"
     },
     {
       id: 2,
-      title: "Promoção 6: Laços de Sangue",
-      year: "2025",
-      duration: "110min",
-      image: "https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "CAM"
+      title: "Elementos",
+      year: "2023",
+      duration: "102min",
+      image: "https://image.tmdb.org/t/p/w500/6oH378gE7vSoRvHwKqfS_OjkSj2.jpg",
+      quality: "HD",
+      type: "LEG"
     },
     {
       id: 3,
-      title: "Resgate Implacável",
-      year: "2025",
-      duration: "118min",
-      image: "https://images.unsplash.com/photo-1440404653325-ab127d49abc1?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "HD"
+      title: "Velozes & Furiosos 10",
+      year: "2023",
+      duration: "141min",
+      image: "https://image.tmdb.org/t/p/w500/wXNihLltMCGR7Xep3fSo7Y0VvDk.jpg",
+      quality: "FULLHD",
+      type: "DUB"
     },
     {
       id: 4,
-      title: "Um Filme Minecraft",
-      year: "2025",
-      duration: "101min",
-      image: "https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "HD"
+      title: "Guardiões da Galáxia: Volume 3",
+      year: "2023",
+      duration: "150min",
+      image: "https://image.tmdb.org/t/p/w500/mgFdvrwlzM6xRaPAFYiVj3G7ou4.jpg",
+      quality: "4K",
+      type: "DUB"
     },
     {
       id: 5,
-      title: "Karatê Kid: Lendas",
-      year: "2025",
-      duration: "90min",
-      image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "CAM"
-    }
+      title: "Homem-Aranha: Através do Aranhaverso",
+      year: "2023",
+      duration: "140min",
+      image: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+      quality: "FULLHD",
+      type: "LEG"
+    },
+     {
+      id: 6,
+      title: "Oppenheimer",
+      year: "2023",
+      duration: "180min",
+      image: "https://image.tmdb.org/t/p/w500/c0DCmfLh6Lh3SRs372GN7b0EHaC.jpg",
+      quality: "4K",
+      type: "DUB"
+    },
+    {
+      id: 7,
+      title: "Barbie",
+      year: "2023",
+      duration: "114min",
+      image: "https://image.tmdb.org/t/p/w500/yRRuLt7sMB0xOSjBlwPNOo50G56.jpg",
+      quality: "FULLHD",
+      type: "LEG"
+    },
   ];
 
   const seriesData = [
     {
       id: 1,
-      title: "Pablo e Luisão",
-      year: "2025",
-      duration: "95min",
-      image: "https://images.unsplash.com/photo-1535016120720-40c646be5580?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "HD"
+      title: "The Last of Us",
+      year: "2023",
+      duration: "S1 E9",
+      image: "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7tKqQR.jpg",
+      quality: "4K",
+      type: "DUB"
     },
     {
       id: 2,
-      title: "Georgie e Mandy - Seu Primeiro Casamento",
-      year: "2024",
-      duration: "18min",
-      image: "https://images.unsplash.com/photo-1522869635100-9f4c5e86aa37?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "HD"
+      title: "Wandinha",
+      year: "2022",
+      duration: "S1 E8",
+      image: "https://image.tmdb.org/t/p/w500/ooBR3q49rorFe72OiAyH3W9Xhcb.jpg",
+      quality: "FULLHD",
+      type: "DUB"
     },
     {
       id: 3,
-      title: "Muito Esforçado",
-      year: "2025",
-      duration: "37min",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=400&fit=crop",
-      quality: "LEG",
-      type: "HD"
+      title: "The Mandalorian",
+      year: "2023",
+      duration: "S3 E8",
+      image: "https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg",
+      quality: "4K",
+      type: "LEG"
     },
     {
       id: 4,
-      title: "Motorheads: Velozes e Apaixonados",
-      year: "2025",
-      duration: "48min",
-      image: "https://images.unsplash.com/photo-1560472354-b33ff0c44a43?w=300&h=400&fit=crop",
-      quality: "LEG",
-      type: "HD"
+      title: "Succession",
+      year: "2023",
+      duration: "S4 E10",
+      image: "https://image.tmdb.org/t/p/w500/x5tY3UEKSeS7K2EML0zJcR0aN2r.jpg",
+      quality: "FULLHD",
+      type: "LEG"
     },
     {
       id: 5,
-      title: "O Jogo do Diabo",
+      title: "Loki",
       year: "2023",
-      duration: "101min",
-      image: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=300&h=400&fit=crop",
-      quality: "DUB",
-      type: "HD"
+      duration: "S2 E6",
+      image: "https://image.tmdb.org/t/p/w500/voHU2TwK2x355TzT5v3QvfC54g.jpg",
+      quality: "4K",
+      type: "DUB"
+    },
+    {
+      id: 6,
+      title: "Ahsoka",
+      year: "2023",
+      duration: "S1 E8",
+      image: "https://image.tmdb.org/t/p/w500/laN1B5S4FX8b99Vd6n272YOvzo9.jpg",
+      quality: "FULLHD",
+      type: "DUB"
+    },
+    {
+      id: 7,
+      title: "Gen V",
+      year: "2023",
+      duration: "S1 E8",
+      image: "https://image.tmdb.org/t/p/w500/sH32Tf9UBxM2Q0adq2jP0nPU27q.jpg",
+      quality: "4K",
+      type: "LEG"
     }
   ];
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white selection:bg-red-500 selection:text-white">
       <Navbar />
-      <HeroSection />
-      <div className="px-4 md:px-8 lg:px-16 pb-16">
-        <ContentCarousel 
-          title="Filmes" 
-          data={moviesData}
-          categories={["LANÇAMENTOS", "RECENTES", "MAIS VISTOS", "EM ALTA"]}
-        />
-        <ContentCarousel 
-          title="Séries" 
-          data={seriesData}
-          categories={["NOVOS EPISÓDIOS", "RECENTES", "MAIS VISTOS", "EM ALTA"]}
-        />
-      </div>
+      <main>
+        <HeroSection />
+        <div className="px-4 md:px-8 lg:px-16 py-8 md:py-12"> {/* Aumentado o py */}
+          <ContentCarousel 
+            title="Filmes" 
+            data={moviesData}
+            categories={["LANÇAMENTOS", "MAIS VISTOS", "EM ALTA", "RECOMENDADOS"]}
+          />
+          <div className="my-8 md:my-12"> {/* Espaçamento entre os carrosséis */}
+            <ContentCarousel 
+              title="Séries" 
+              data={seriesData}
+              categories={["NOVOS EPISÓDIOS", "MAIS VISTAS", "EM ALTA", "RECOMENDADAS"]}
+            />
+          </div>
+        </div>
+      </main>
       <Footer />
     </div>
   );
