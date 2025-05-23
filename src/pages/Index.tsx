@@ -2,7 +2,7 @@
 import React from 'react';
 import Navbar from '../components/Navbar';
 import HeroSection from '../components/HeroSection';
-import ContentCarousel from '../components/ContentCarousel';
+import ContentCarouselWrapper from '../components/ContentCarouselWrapper';
 import Footer from '../components/Footer';
 
 const Index = () => {
@@ -143,14 +143,14 @@ const Index = () => {
       <Navbar />
       <main>
         <HeroSection />
-        <div className="px-4 md:px-8 lg:px-16 py-8 md:py-12"> {/* Aumentado o py */}
-          <ContentCarousel 
+        <div className="px-4 md:px-8 lg:px-16 py-8 md:py-12"> 
+          <ContentCarouselWrapper 
             title="Filmes" 
             data={moviesData}
             categories={["LANÇAMENTOS", "MAIS VISTOS", "EM ALTA", "RECOMENDADOS"]}
           />
-          <div className="my-8 md:my-12"> {/* Espaçamento entre os carrosséis */}
-            <ContentCarousel 
+          <div className="my-8 md:my-12"> 
+            <ContentCarouselWrapper 
               title="Séries" 
               data={seriesData}
               categories={["NOVOS EPISÓDIOS", "MAIS VISTAS", "EM ALTA", "RECOMENDADAS"]}
