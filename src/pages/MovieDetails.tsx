@@ -87,21 +87,27 @@ const MovieDetails = () => {
       <Navbar />
       
       <main className="pt-16">
-        {/* Movie Background with Gradient Overlay */}
+        {/* Movie Background with improved Gradient Overlay */}
         <div 
-          className="relative w-full h-[500px] md:h-[600px] lg:h-[80vh] bg-cover bg-center bg-fixed transition-all duration-700"
+          className="relative w-full h-[500px] md:h-[600px] lg:h-[80vh] bg-cover bg-center transition-all duration-700 overflow-hidden"
           style={{ 
             backgroundImage: `url(${movie.backdrop})`, 
+            backgroundAttachment: 'fixed',
+            backgroundSize: 'cover',
+            backgroundPosition: '50% 0%',
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/70 to-gray-950"></div>
+          {/* Improved gradient overlay for better text visibility and smoother transition */}
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/30 via-gray-900/70 to-gray-950 backdrop-blur-[2px]"></div>
+          <div className="absolute inset-0 bg-gradient-to-r from-gray-900/80 to-transparent"></div>
+          <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-gray-950 to-transparent"></div>
           
           <div className="relative container mx-auto px-4 h-full flex items-end pb-16">
             <MovieHeader movie={movie} />
           </div>
         </div>
         
-        <div className="container mx-auto px-4 py-12">
+        <div className="container mx-auto px-4 py-12 -mt-6 relative z-10">
           <div className="grid grid-cols-1 gap-12">
             <div>
               {/* Movie Info */}
