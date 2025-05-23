@@ -65,7 +65,7 @@ const SeasonsAndEpisodes: React.FC<SeasonsAndEpisodesProps> = ({
       
       {/* Season Info */}
       {currentSeason && (
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           <motion.div
             key={selectedSeason}
             initial={{ opacity: 0, y: 20 }}
