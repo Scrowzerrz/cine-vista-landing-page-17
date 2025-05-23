@@ -1,45 +1,60 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button'; // Importando o Button do shadcn
-import { PlayIcon, ListPlusIcon, ChevronDownIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { PlayIcon, ListPlusIcon, ChevronDownIcon, InfoIcon } from 'lucide-react';
 
 const HeroSection = () => {
   return (
-    <div className="relative h-[80vh] md:h-screen flex items-center justify-center overflow-hidden">
+    <div className="relative h-[90vh] md:h-screen flex items-center justify-start text-left overflow-hidden"> {/* Ajustado para 90vh e justify-start, text-left */}
       {/* Background Image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{
-          backgroundImage: 'url("https://images.unsplash.com/photo-1626972774899-5e34ecebcc0f?w=1920&h=1080&fit=crop&q=80")', // Adicionado q=80 para qualidade
+          backgroundImage: 'url("https://images.unsplash.com/photo-1626972774899-5e34ecebcc0f?w=1920&h=1080&fit=crop&q=80&auto=format")', // Adicionado auto=format
         }}
       >
-        <div className="absolute inset-0 bg-black/70"></div> {/* Aumentado um pouco o overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/50 to-transparent"></div>
+        <div className="absolute inset-0 bg-black/60"></div> {/* Overlay sutil */}
+        {/* Gradiente mais elaborado */}
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/70 to-transparent"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"></div>
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-4 md:px-8">
-        <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 md:mb-8 tracking-tight leading-tight"> {/* Ajustes de tipografia */}
+      <div className="relative z-10 px-4 sm:px-8 md:px-16 lg:px-24 max-w-3xl"> {/* Aumentado padding e max-width */}
+        <img 
+          src="https://image.tmdb.org/t/p/original/uKvVjHNqB5VmOrdxqAt2F7tKqQR.jpg" // Exemplo: Logo de "The Last of Us" ou imagem promocional específica
+          alt="The Last of Us Title Card"
+          className="w-full max-w-md mb-4 md:mb-6 opacity-90" // Imagem de título da série
+        />
+        {/* <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-black text-white mb-6 md:mb-8 tracking-tight leading-tight">
           THE<br />
           <span className="text-red-500">LAST</span><br />
           OF US
-        </h1>
+        </h1> */}
         
-        <div className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-3 md:space-x-4">
-          <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white font-semibold px-6 py-3 md:px-8 md:py-4 rounded-lg text-sm md:text-base w-full sm:w-auto">
+        <p className="text-base sm:text-lg md:text-xl text-gray-200 mb-6 md:mb-8 max-w-xl leading-relaxed">
+          Em um mundo pós-apocalíptico devastado, Joel e Ellie lutam pela sobrevivência enquanto atravessam os Estados Unidos enfrentando perigos inimagináveis.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-start sm:items-center space-y-3 sm:space-y-0 sm:space-x-3 md:space-x-4">
+          <Button size="lg" className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 md:px-8 md:py-4 rounded-lg text-sm md:text-base w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <PlayIcon className="mr-2 h-5 w-5 md:h-6 md:w-6" />
-            ASSISTIR SÉRIE
+            ASSISTIR AGORA
           </Button>
-          <Button variant="outline" size="lg" className="bg-gray-700/50 hover:bg-gray-600/70 text-white border-gray-600/80 hover:border-gray-500/80 font-semibold px-6 py-3 md:px-8 md:py-4 rounded-lg text-sm md:text-base backdrop-blur-sm w-full sm:w-auto">
+          <Button variant="outline" size="lg" className="bg-white/10 hover:bg-white/20 text-white border-white/30 hover:border-white/50 font-semibold px-6 py-3 md:px-8 md:py-4 rounded-lg text-sm md:text-base backdrop-blur-sm w-full sm:w-auto shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105">
             <ListPlusIcon className="mr-2 h-5 w-5 md:h-6 md:w-6" />
-            ADICIONAR À LISTA
+            MINHA LISTA
+          </Button>
+           <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors duration-300 sm:ml-2">
+            <InfoIcon className="h-6 w-6 md:h-7 md:h-7" />
+            <span className="sr-only">Mais Informações</span>
           </Button>
         </div>
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-6 md:bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce text-white/70 hover:text-white transition-colors cursor-pointer">
-        <ChevronDownIcon className="w-8 h-8 md:w-10 md:h-10" />
+      <div className="absolute bottom-6 md:bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce text-white/70 hover:text-white transition-colors cursor-pointer">
+        <ChevronDownIcon className="w-10 h-10 md:w-12 md:h-12" />
       </div>
     </div>
   );
