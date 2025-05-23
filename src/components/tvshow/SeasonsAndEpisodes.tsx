@@ -37,10 +37,10 @@ const SeasonsAndEpisodes: React.FC<SeasonsAndEpisodesProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay: 0.2 }}
-      className="mt-12 backdrop-blur-sm bg-gray-800/40 rounded-3xl border border-gray-700/50 p-8 shadow-xl hover:shadow-2xl transition-shadow duration-300"
+      className="mt-12"
     >
       {/* Header Section */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
         <motion.h3 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
@@ -89,24 +89,6 @@ const SeasonsAndEpisodes: React.FC<SeasonsAndEpisodesProps> = ({
         selectedSeason={selectedSeason} 
         setSelectedSeason={setSelectedSeason} 
       />
-      
-      {/* Current Season Info Bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="mb-8 flex items-center justify-between p-4 bg-gradient-to-r from-red-900/30 to-red-800/20 rounded-2xl border border-red-700/30"
-      >
-        <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center shadow-lg">
-            <span className="text-white font-bold text-lg">{currentSeason.number}</span>
-          </div>
-          <div>
-            <h4 className="text-white font-semibold text-lg">Temporada {currentSeason.number}</h4>
-            <p className="text-red-300 text-sm">{currentSeason.year} • {currentSeason.episodes.length} episódios</p>
-          </div>
-        </div>
-      </motion.div>
       
       {/* Episode List */}
       <EpisodeList 
