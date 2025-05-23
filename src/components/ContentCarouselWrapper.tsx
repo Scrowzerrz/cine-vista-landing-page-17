@@ -11,20 +11,20 @@ interface ContentItem {
   image: string;
   quality: string;
   type: string;
-  contentType?: 'movie' | 'tvshow'; // Added contentType to determine the route
+  contentType?: 'movie' | 'tvshow'; // Define o tipo de conteúdo para roteamento
 }
 
 interface ContentCarouselWrapperProps {
   title: string;
   data: ContentItem[];
   categories: string[];
-  contentType?: 'movie' | 'tvshow'; // Default will be 'movie' if not specified
+  contentType?: 'movie' | 'tvshow'; // Padrão será 'movie' se não especificado
 }
 
 const ContentCarouselWrapper: React.FC<ContentCarouselWrapperProps> = ({ 
   title, data, categories, contentType = 'movie'
 }) => {
-  // Add contentType to each item if not already present
+  // Adiciona o tipo de conteúdo a cada item se ainda não tiver
   const enrichedData = data.map(item => ({
     ...item,
     contentType: item.contentType || contentType
@@ -47,7 +47,7 @@ const ContentCarouselWrapper: React.FC<ContentCarouselWrapperProps> = ({
               image={item.image}
               quality={item.quality}
               type={item.type}
-              contentType={item.contentType}
+              contentType={item.contentType as 'movie' | 'tvshow'}
             />
           )}
         />

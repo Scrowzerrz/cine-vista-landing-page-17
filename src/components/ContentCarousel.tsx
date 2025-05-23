@@ -11,6 +11,7 @@ interface ContentItem {
   image: string;
   quality: string;
   type: string;
+  contentType?: 'movie' | 'tvshow';
 }
 
 interface ContentCarouselProps {

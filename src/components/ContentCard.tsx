@@ -21,6 +21,7 @@ const ContentCard: React.FC<ContentCardProps> = ({
   const navigate = useNavigate();
   
   const handleClick = () => {
+    // Redireciona para a página correta com base no tipo de conteúdo
     navigate(`/${contentType}/${id}`);
   };
   

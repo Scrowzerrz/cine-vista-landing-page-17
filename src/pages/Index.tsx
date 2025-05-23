@@ -14,7 +14,8 @@ const Index = () => {
       duration: "163min",
       image: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYUkEgdZe.jpg",
       quality: "FULLHD",
-      type: "DUB"
+      type: "DUB",
+      contentType: "movie"
     },
     {
       id: 2,
@@ -23,7 +24,8 @@ const Index = () => {
       duration: "102min",
       image: "https://image.tmdb.org/t/p/w500/6oH378gE7vSoRvHwKqfS_OjkSj2.jpg",
       quality: "HD",
-      type: "LEG"
+      type: "LEG",
+      contentType: "movie"
     },
     {
       id: 3,
@@ -32,7 +34,8 @@ const Index = () => {
       duration: "141min",
       image: "https://image.tmdb.org/t/p/w500/wXNihLltMCGR7Xep3fSo7Y0VvDk.jpg",
       quality: "FULLHD",
-      type: "DUB"
+      type: "DUB",
+      contentType: "movie"
     },
     {
       id: 4,
@@ -41,7 +44,8 @@ const Index = () => {
       duration: "150min",
       image: "https://image.tmdb.org/t/p/w500/mgFdvrwlzM6xRaPAFYiVj3G7ou4.jpg",
       quality: "4K",
-      type: "DUB"
+      type: "DUB",
+      contentType: "movie"
     },
     {
       id: 5,
@@ -50,7 +54,8 @@ const Index = () => {
       duration: "140min",
       image: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
       quality: "FULLHD",
-      type: "LEG"
+      type: "LEG",
+      contentType: "movie"
     },
      {
       id: 6,
@@ -59,7 +64,8 @@ const Index = () => {
       duration: "180min",
       image: "https://image.tmdb.org/t/p/w500/c0DCmfLh6Lh3SRs372GN7b0EHaC.jpg",
       quality: "4K",
-      type: "DUB"
+      type: "DUB",
+      contentType: "movie"
     },
     {
       id: 7,
@@ -68,7 +74,8 @@ const Index = () => {
       duration: "114min",
       image: "https://image.tmdb.org/t/p/w500/yRRuLt7sMB0xOSjBlwPNOo50G56.jpg",
       quality: "FULLHD",
-      type: "LEG"
+      type: "LEG",
+      contentType: "movie"
     },
   ];
 
@@ -80,7 +87,8 @@ const Index = () => {
       duration: "S1 E9",
       image: "https://image.tmdb.org/t/p/w500/uKvVjHNqB5VmOrdxqAt2F7tKqQR.jpg",
       quality: "4K",
-      type: "DUB"
+      type: "DUB",
+      contentType: "tvshow"
     },
     {
       id: 2,
@@ -89,7 +97,8 @@ const Index = () => {
       duration: "S1 E8",
       image: "https://image.tmdb.org/t/p/w500/ooBR3q49rorFe72OiAyH3W9Xhcb.jpg",
       quality: "FULLHD",
-      type: "DUB"
+      type: "DUB",
+      contentType: "tvshow"
     },
     {
       id: 3,
@@ -98,7 +107,8 @@ const Index = () => {
       duration: "S3 E8",
       image: "https://image.tmdb.org/t/p/w500/eU1i6eHXlzMOlEq0ku1Rzq7Y4wA.jpg",
       quality: "4K",
-      type: "LEG"
+      type: "LEG",
+      contentType: "tvshow"
     },
     {
       id: 4,
@@ -107,7 +117,8 @@ const Index = () => {
       duration: "S4 E10",
       image: "https://image.tmdb.org/t/p/w500/x5tY3UEKSeS7K2EML0zJcR0aN2r.jpg",
       quality: "FULLHD",
-      type: "LEG"
+      type: "LEG",
+      contentType: "tvshow"
     },
     {
       id: 5,
@@ -116,7 +127,8 @@ const Index = () => {
       duration: "S2 E6",
       image: "https://image.tmdb.org/t/p/w500/voHU2TwK2x355TzT5v3QvfC54g.jpg",
       quality: "4K",
-      type: "DUB"
+      type: "DUB",
+      contentType: "tvshow"
     },
     {
       id: 6,
@@ -125,7 +137,8 @@ const Index = () => {
       duration: "S1 E8",
       image: "https://image.tmdb.org/t/p/w500/laN1B5S4FX8b99Vd6n272YOvzo9.jpg",
       quality: "FULLHD",
-      type: "DUB"
+      type: "DUB",
+      contentType: "tvshow"
     },
     {
       id: 7,
@@ -134,7 +147,8 @@ const Index = () => {
       duration: "S1 E8",
       image: "https://image.tmdb.org/t/p/w500/sH32Tf9UBxM2Q0adq2jP0nPU27q.jpg",
       quality: "4K",
-      type: "LEG"
+      type: "LEG",
+      contentType: "tvshow"
     }
   ];
 
@@ -149,12 +163,14 @@ const Index = () => {
             title="Filmes" 
             data={moviesData}
             categories={["LANÇAMENTOS", "MAIS VISTOS", "EM ALTA", "RECOMENDADOS"]}
+            contentType="movie"
           />
           
           <ContentCarouselWrapper 
             title="Séries" 
             data={seriesData}
             categories={["NOVOS EPISÓDIOS", "MAIS VISTAS", "EM ALTA", "RECOMENDADAS"]}
+            contentType="tvshow"
           />
         </div>
       </main>
