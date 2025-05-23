@@ -7,10 +7,7 @@ import MovieHeader from '@/components/movie/MovieHeader';
 import MovieInfo from '@/components/movie/MovieInfo';
 import RelatedMovies from '@/components/movie/RelatedMovies';
 import Comments from '@/components/movie/Comments';
-import { Button } from '@/components/ui/button';
-import { Play, Plus, Share } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { motion } from 'framer-motion';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -88,90 +85,46 @@ const MovieDetails = () => {
   ];
 
   return (
-    <div className="bg-gray-900 min-h-screen text-white selection:bg-red-500 selection:text-white">
+    <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white selection:bg-red-500 selection:text-white">
       <Navbar />
       
       <main className="pt-16">
         {/* Movie Background with Gradient Overlay */}
         <div 
-          className="relative w-full h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center"
+          className="relative w-full h-[500px] md:h-[600px] lg:h-[70vh] bg-cover bg-center bg-fixed transition-all duration-700"
           style={{ 
             backgroundImage: `url(${movie.backdrop})`, 
           }}
         >
-          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/20 via-gray-900/70 to-gray-900"></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-gray-900/40 via-gray-900/80 to-gray-950"></div>
           
           <div className="relative container mx-auto px-4 h-full flex items-end pb-12">
             <MovieHeader movie={movie} />
           </div>
         </div>
         
-        <div className="container mx-auto px-4 py-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <div className="md:col-span-3">
+        <div className="container mx-auto px-4 py-12">
+          <div className="grid grid-cols-1 gap-10">
+            <div>
               {/* Movie Info */}
               <MovieInfo movie={movie} />
-              
-              {/* Stream Options */}
-              <div className="mt-8 bg-gray-800/50 backdrop-blur-sm p-6 rounded-lg border border-gray-700">
-                <h3 className="text-xl font-bold mb-4">Opções para Assistir</h3>
-                
-                <div className="space-y-3">
-                  {movie.links.map((link, index) => (
-                    <div key={index} className="flex items-center justify-between py-3 border-b border-gray-700 last:border-0">
-                      <span className="text-gray-300">{link.label}</span>
-                      <Button variant="default" className="bg-red-600 hover:bg-red-700">
-                        <Play className="mr-2 h-4 w-4" /> Assistir
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              
-              {/* Related Movies */}
-              <div className="mt-8">
-                <RelatedMovies movies={relatedMovies} />
-              </div>
-              
-              {/* Comments Section */}
-              <div className="mt-8">
-                <Comments />
-              </div>
             </div>
             
-            {/* Sidebar with Related Content */}
-            <div className="md:col-span-1">
-              <div className="bg-gray-800/50 backdrop-blur-sm p-4 rounded-lg border border-gray-700 sticky top-20">
-                <h3 className="text-lg font-bold mb-4">Recomendações</h3>
-                
-                <ScrollArea className="h-[500px]">
-                  <div className="space-y-4 pr-4">
-                    {relatedMovies.map((movie) => (
-                      <div key={movie.id} className="flex space-x-3">
-                        <img 
-                          src={movie.image} 
-                          alt={movie.title}
-                          className="w-16 h-24 object-cover rounded-md"
-                        />
-                        <div className="flex flex-col justify-between">
-                          <div>
-                            <h4 className="font-medium text-sm leading-tight">{movie.title}</h4>
-                            <p className="text-xs text-gray-400">{movie.year} • {movie.duration}</p>
-                          </div>
-                          <div className="flex space-x-1">
-                            <Badge variant="outline" className="text-[10px] h-4 bg-gray-700/70 border-gray-600">
-                              {movie.quality}
-                            </Badge>
-                            <Badge variant="outline" className="text-[10px] h-4 bg-blue-600/20 text-blue-400 border-blue-800">
-                              {movie.type}
-                            </Badge>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </ScrollArea>
-              </div>
+            {/* Related Movies */}
+            <div className="mt-8">
+              <RelatedMovies movies={relatedMovies} />
+            </div>
+            
+            {/* Comments Section */}
+            <div className="mt-8">
+              <motion.div 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="backdrop-blur-sm bg-gray-800/30 rounded-xl border border-gray-700/50 p-6 shadow-lg"
+              >
+                <Comments />
+              </motion.div>
             </div>
           </div>
         </div>
