@@ -13,8 +13,11 @@ export const useUserRole = () => {
 
   useEffect(() => {
     const fetchUserRoles = async () => {
+      console.log('fetchUserRoles called with:', { user: user?.id, authLoading });
+      
       // Se ainda está carregando auth, aguardar
       if (authLoading) {
+        console.log('Auth still loading, waiting...');
         setLoading(true);
         setError(null);
         return;
@@ -22,7 +25,7 @@ export const useUserRole = () => {
 
       // Se não tem usuário, definir como usuário comum
       if (!user) {
-        console.log('No user, setting as regular user');
+        console.log('No user found, setting as regular user');
         setRoles(['user']);
         setLoading(false);
         setError(null);
@@ -35,55 +38,41 @@ export const useUserRole = () => {
         setLoading(true);
         setError(null);
         
-        // Verificar se é admin usando a função RPC
-        const { data: isAdminData, error: adminError } = await supabase
-          .rpc('is_user_admin', { user_id_param: user.id });
+        // Usar a nova função get_user_roles
+        const { data: userRoles, error: rolesError } = await supabase
+          .rpc('get_user_roles', { user_id_param: user.id });
 
-        if (adminError) {
-          console.error('Error checking admin status:', adminError);
-          // Se houver erro, definir como usuário comum mas não travar
+        if (rolesError) {
+          console.error('Error fetching user roles:', rolesError);
+          // Se houver erro, definir como usuário comum
           setRoles(['user']);
-          setError('Erro ao verificar permissões de admin');
-          setLoading(false);
-          return;
-        }
-
-        console.log('Is admin check result:', isAdminData);
-
-        if (isAdminData) {
-          // Se é admin, buscar todas as roles
-          const { data: rolesData, error: rolesError } = await supabase
-            .from('user_roles')
-            .select('role')
-            .eq('user_id', user.id);
-
-          if (rolesError) {
-            console.error('Error fetching user roles:', rolesError);
-            // Se houver erro mas sabemos que é admin, dar pelo menos role de admin
-            setRoles(['admin']);
-            setError('Erro ao buscar roles detalhadas');
-          } else {
-            const userRoles = rolesData?.map(item => item.role as UserRole) || ['admin'];
-            setRoles(userRoles);
-            console.log('User roles loaded:', userRoles);
-          }
+          setError('Erro ao buscar roles do usuário');
         } else {
-          // Se não é admin, definir como usuário comum
-          console.log('User is not admin, setting as regular user');
-          setRoles(['user']);
+          console.log('Raw roles data:', userRoles);
+          
+          if (userRoles && userRoles.length > 0) {
+            const rolesList = userRoles.map((r: any) => r.role_name as UserRole);
+            console.log('Processed roles:', rolesList);
+            setRoles(rolesList);
+          } else {
+            // Se não tem roles específicas, é usuário comum
+            console.log('No specific roles found, setting as regular user');
+            setRoles(['user']);
+          }
         }
       } catch (error) {
-        console.error('Error in fetchUserRoles:', error);
+        console.error('Exception in fetchUserRoles:', error);
         setError('Erro ao verificar permissões');
         // Em caso de erro, definir como usuário comum para não bloquear acesso
         setRoles(['user']);
       } finally {
         setLoading(false);
+        console.log('fetchUserRoles completed');
       }
     };
 
     fetchUserRoles();
-  }, [user?.id, authLoading]); // Dependências específicas para evitar loops
+  }, [user?.id, authLoading]);
 
   const hasRole = (role: UserRole) => {
     const result = roles.includes(role);
@@ -94,7 +83,7 @@ export const useUserRole = () => {
   const isAdmin = () => hasRole('admin');
   const isModerator = () => hasRole('moderator');
 
-  console.log('useUserRole state:', { 
+  console.log('useUserRole final state:', { 
     userId: user?.id, 
     roles, 
     loading, 

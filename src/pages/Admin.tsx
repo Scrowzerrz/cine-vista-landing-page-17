@@ -12,18 +12,22 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading, error: roleError } = useUserRole();
 
-  console.log('Admin page state:', { 
+  console.log('=== ADMIN PAGE RENDER ===');
+  console.log('Auth state:', { 
     hasUser: !!user, 
     userEmail: user?.email,
-    authLoading, 
+    userId: user?.id,
+    authLoading 
+  });
+  console.log('Role state:', { 
     roleLoading, 
     isAdminResult: isAdmin(),
     roleError 
   });
 
-  // Se está carregando autenticação, mostrar loading
+  // Aguardar autenticação ser carregada
   if (authLoading) {
-    console.log('Admin: showing auth loading');
+    console.log('Admin: Auth loading...');
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
         <Navbar />
@@ -43,15 +47,15 @@ const Admin = () => {
     );
   }
 
-  // Se não está autenticado, redirecionar para login
+  // Se não está autenticado
   if (!user) {
-    console.log('Admin: no user, redirecting to auth');
+    console.log('Admin: No user found, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
-  // Se ainda está verificando roles, mostrar loading específico
+  // Aguardar verificação de roles
   if (roleLoading) {
-    console.log('Admin: showing role loading');
+    console.log('Admin: Role verification loading...');
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">
         <Navbar />
@@ -74,22 +78,17 @@ const Admin = () => {
     );
   }
 
-  // Se houve erro na verificação de roles, mostrar erro mas permitir acesso se for admin
-  if (roleError) {
-    console.warn('Admin: role verification error:', roleError);
-  }
-
   // Verificar se é admin
   const userIsAdmin = isAdmin();
-  console.log('Admin: final admin check:', userIsAdmin);
+  console.log('Admin: Final admin check result:', userIsAdmin);
 
-  // Se não é admin, redirecionar para home
+  // Se não é admin, redirecionar
   if (!userIsAdmin) {
-    console.log('Admin: user is not admin, redirecting to home');
+    console.log('Admin: User is not admin, redirecting to home');
     return <Navigate to="/" replace />;
   }
 
-  console.log('Admin: rendering admin panel');
+  console.log('Admin: Rendering admin panel for user:', user.email);
 
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">

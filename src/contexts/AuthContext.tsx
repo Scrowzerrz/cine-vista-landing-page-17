@@ -20,6 +20,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('=== AUTH CONTEXT SETUP ===');
     let mounted = true;
 
     // Função para buscar perfil do usuário
@@ -41,44 +42,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('Profile loaded:', data);
         }
       } catch (error) {
-        console.error('Error in fetchProfile:', error);
+        console.error('Exception in fetchProfile:', error);
         if (mounted) {
           setProfile(null);
         }
       }
     };
 
-    // Configurar listener de mudanças de auth PRIMEIRO
+    // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         if (!mounted) return;
 
-        console.log('Auth state changed:', event, !!session, session?.user?.email);
+        console.log('=== AUTH STATE CHANGE ===');
+        console.log('Event:', event);
+        console.log('Session exists:', !!session);
+        console.log('User:', session?.user?.email);
         
         setSession(session);
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Buscar perfil quando usuário faz login
+          console.log('User logged in, fetching profile...');
           await fetchProfile(session.user.id);
         } else {
-          // Limpar perfil quando usuário faz logout
+          console.log('User logged out, clearing profile');
           setProfile(null);
         }
         
-        // Sempre marcar como não carregando após processar mudança de auth
+        // Marcar como não carregando após processar
         setLoading(false);
+        console.log('Auth state change processed, loading set to false');
       }
     );
 
-    // Depois verificar sessão existente
+    // Verificar sessão existente
     const getInitialSession = async () => {
       try {
         console.log('Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
-          console.error('Error getting session:', error);
+          console.error('Error getting initial session:', error);
           if (mounted) {
             setSession(null);
             setUser(null);
@@ -88,20 +93,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           return;
         }
 
-        console.log('Initial session:', !!session, session?.user?.email);
+        console.log('Initial session result:', !!session, session?.user?.email);
 
         if (mounted) {
           setSession(session);
           setUser(session?.user ?? null);
           
           if (session?.user) {
+            console.log('Initial session has user, fetching profile...');
             await fetchProfile(session.user.id);
           }
           
           setLoading(false);
+          console.log('Initial session processed, loading set to false');
         }
       } catch (error) {
-        console.error('Error in getInitialSession:', error);
+        console.error('Exception in getInitialSession:', error);
         if (mounted) {
           setSession(null);
           setUser(null);
@@ -111,11 +118,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Inicializar sessão
+    // Inicializar
     getInitialSession();
 
     // Cleanup
     return () => {
+      console.log('AuthContext cleanup');
       mounted = false;
       subscription.unsubscribe();
     };
@@ -131,7 +139,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('Signed out successfully');
       }
     } catch (error) {
-      console.error('Error in signOut:', error);
+      console.error('Exception in signOut:', error);
     }
   };
 
@@ -143,11 +151,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     signOut,
   };
 
-  console.log('AuthContext state:', { 
+  console.log('AuthContext render state:', { 
     hasUser: !!user, 
     hasSession: !!session, 
     hasProfile: !!profile, 
-    loading 
+    loading,
+    userEmail: user?.email
   });
 
   return (
