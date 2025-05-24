@@ -38,9 +38,11 @@ export const useUserRole = () => {
         setLoading(true);
         setError(null);
         
-        // Usar a nova função get_user_roles
+        // Buscar diretamente na tabela user_roles em vez de usar RPC
         const { data: userRoles, error: rolesError } = await supabase
-          .rpc('get_user_roles', { user_id_param: user.id });
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', user.id);
 
         if (rolesError) {
           console.error('Error fetching user roles:', rolesError);
@@ -51,7 +53,7 @@ export const useUserRole = () => {
           console.log('Raw roles data:', userRoles);
           
           if (userRoles && userRoles.length > 0) {
-            const rolesList = userRoles.map((r: any) => r.role_name as UserRole);
+            const rolesList = userRoles.map((r: any) => r.role as UserRole);
             console.log('Processed roles:', rolesList);
             setRoles(rolesList);
           } else {
