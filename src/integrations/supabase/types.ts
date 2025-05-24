@@ -63,6 +63,50 @@ export type Database = {
         }
         Relationships: []
       }
+      episodes: {
+        Row: {
+          created_at: string
+          episode_number: number
+          id: string
+          overview: string
+          player_url: string
+          poster: string
+          runtime: string
+          season_id: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          episode_number: number
+          id?: string
+          overview: string
+          player_url: string
+          poster: string
+          runtime: string
+          season_id: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          episode_number?: number
+          id?: string
+          overview?: string
+          player_url?: string
+          poster?: string
+          runtime?: string
+          season_id?: string
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "episodes_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       movie_actors: {
         Row: {
           actor_id: string
@@ -302,6 +346,245 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      related_tvshows: {
+        Row: {
+          related_tvshow_id: string
+          tvshow_id: string
+        }
+        Insert: {
+          related_tvshow_id: string
+          tvshow_id: string
+        }
+        Update: {
+          related_tvshow_id?: string
+          tvshow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "related_tvshows_related_tvshow_id_fkey"
+            columns: ["related_tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "related_tvshows_tvshow_id_fkey"
+            columns: ["tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          episode_count: number
+          id: string
+          season_number: number
+          tvshow_id: string
+          year: string
+        }
+        Insert: {
+          created_at?: string
+          episode_count?: number
+          id?: string
+          season_number: number
+          tvshow_id: string
+          year: string
+        }
+        Update: {
+          created_at?: string
+          episode_count?: number
+          id?: string
+          season_number?: number
+          tvshow_id?: string
+          year?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "seasons_tvshow_id_fkey"
+            columns: ["tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tvshow_actors: {
+        Row: {
+          actor_id: string
+          tvshow_id: string
+        }
+        Insert: {
+          actor_id: string
+          tvshow_id: string
+        }
+        Update: {
+          actor_id?: string
+          tvshow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tvshow_actors_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "actors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tvshow_actors_tvshow_id_fkey"
+            columns: ["tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tvshow_categories: {
+        Row: {
+          category_id: string
+          tvshow_id: string
+        }
+        Insert: {
+          category_id: string
+          tvshow_id: string
+        }
+        Update: {
+          category_id?: string
+          tvshow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tvshow_categories_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tvshow_categories_tvshow_id_fkey"
+            columns: ["tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tvshow_directors: {
+        Row: {
+          director_id: string
+          tvshow_id: string
+        }
+        Insert: {
+          director_id: string
+          tvshow_id: string
+        }
+        Update: {
+          director_id?: string
+          tvshow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tvshow_directors_director_id_fkey"
+            columns: ["director_id"]
+            isOneToOne: false
+            referencedRelation: "directors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tvshow_directors_tvshow_id_fkey"
+            columns: ["tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tvshow_producers: {
+        Row: {
+          producer_id: string
+          tvshow_id: string
+        }
+        Insert: {
+          producer_id: string
+          tvshow_id: string
+        }
+        Update: {
+          producer_id?: string
+          tvshow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tvshow_producers_producer_id_fkey"
+            columns: ["producer_id"]
+            isOneToOne: false
+            referencedRelation: "producers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tvshow_producers_tvshow_id_fkey"
+            columns: ["tvshow_id"]
+            isOneToOne: false
+            referencedRelation: "tvshows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tvshows: {
+        Row: {
+          backdrop: string
+          created_at: string
+          creator: string | null
+          id: string
+          network: string | null
+          original_title: string | null
+          plot: string
+          poster: string
+          quality: string
+          rating: string
+          title: string
+          total_episodes: number
+          total_seasons: number
+          updated_at: string
+          year: string
+        }
+        Insert: {
+          backdrop: string
+          created_at?: string
+          creator?: string | null
+          id?: string
+          network?: string | null
+          original_title?: string | null
+          plot: string
+          poster: string
+          quality: string
+          rating: string
+          title: string
+          total_episodes?: number
+          total_seasons?: number
+          updated_at?: string
+          year: string
+        }
+        Update: {
+          backdrop?: string
+          created_at?: string
+          creator?: string | null
+          id?: string
+          network?: string | null
+          original_title?: string | null
+          plot?: string
+          poster?: string
+          quality?: string
+          rating?: string
+          title?: string
+          total_episodes?: number
+          total_seasons?: number
+          updated_at?: string
+          year?: string
+        }
+        Relationships: []
       }
     }
     Views: {
