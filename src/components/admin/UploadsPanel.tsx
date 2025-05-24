@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { FileImage, Check, X, Trash2, Eye } from 'lucide-react';
+import { FileImage, Check, X, Trash2, Eye, Film, Tv, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,6 +8,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getAllUploads, updateUploadStatus, deleteUpload, getFileUrl, MediaUpload } from '@/services/uploadService';
 import { toast } from '@/hooks/use-toast';
 import FileUpload from './FileUpload';
+import MovieUpload from './MovieUpload';
+import TVShowUpload from './TVShowUpload';
 
 const UploadsPanel: React.FC = () => {
   const [uploads, setUploads] = useState<MediaUpload[]>([]);
@@ -215,9 +217,20 @@ const UploadsPanel: React.FC = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="upload" className="space-y-6">
+      <Tabs defaultValue="movies" className="space-y-6">
         <TabsList className="bg-gray-800">
-          <TabsTrigger value="upload">Novo Upload</TabsTrigger>
+          <TabsTrigger value="movies" className="flex items-center gap-2">
+            <Film className="w-4 h-4" />
+            Filmes
+          </TabsTrigger>
+          <TabsTrigger value="tvshows" className="flex items-center gap-2">
+            <Tv className="w-4 h-4" />
+            Séries
+          </TabsTrigger>
+          <TabsTrigger value="media" className="flex items-center gap-2">
+            <Upload className="w-4 h-4" />
+            Mídia
+          </TabsTrigger>
           <TabsTrigger value="pending">
             Pendentes ({filteredUploads('pending').length})
           </TabsTrigger>
@@ -227,15 +240,20 @@ const UploadsPanel: React.FC = () => {
           <TabsTrigger value="rejected">
             Rejeitados ({filteredUploads('rejected').length})
           </TabsTrigger>
-          <TabsTrigger value="all">
-            Todos ({uploads.length})
-          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="upload">
+        <TabsContent value="movies">
+          <MovieUpload />
+        </TabsContent>
+
+        <TabsContent value="tvshows">
+          <TVShowUpload />
+        </TabsContent>
+
+        <TabsContent value="media">
           <Card className="bg-gray-900 border-gray-800">
             <CardHeader>
-              <CardTitle className="text-white">Enviar Novo Arquivo</CardTitle>
+              <CardTitle className="text-white">Enviar Arquivos de Mídia</CardTitle>
             </CardHeader>
             <CardContent>
               <FileUpload onUploadSuccess={loadUploads} />
@@ -253,10 +271,6 @@ const UploadsPanel: React.FC = () => {
 
         <TabsContent value="rejected">
           <UploadsList uploads={filteredUploads('rejected')} />
-        </TabsContent>
-
-        <TabsContent value="all">
-          <UploadsList uploads={uploads} />
         </TabsContent>
       </Tabs>
     </div>

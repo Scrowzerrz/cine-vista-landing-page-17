@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect } from 'react';
-import { Search, PlayIcon, MenuIcon, XIcon, LogOut, User, Bell, Settings } from 'lucide-react';
+import { Search, PlayIcon, MenuIcon, XIcon, LogOut, User, Bell, Settings, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -213,8 +214,8 @@ const Navbar = () => {
                       </DropdownMenuItem>
                       {isAdmin() && (
                         <DropdownMenuItem className="cursor-pointer text-gray-300 hover:text-white hover:bg-gray-800" onClick={() => navigate('/upanel')}>
-                          <Settings className="mr-2 h-4 w-4" />
-                          <span>Painel Admin</span>
+                          <Upload className="mr-2 h-4 w-4" />
+                          <span>Painel de Uploads</span>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuItem className="cursor-pointer text-gray-300 hover:text-white hover:bg-gray-800" onClick={handleSignOut}>
@@ -361,8 +362,8 @@ const Navbar = () => {
                             setIsMobileMenuOpen(false);
                           }}
                         >
-                          <Settings className="mr-2 h-4 w-4" />
-                          Painel Admin
+                          <Upload className="mr-2 h-4 w-4" />
+                          Painel de Uploads
                         </Button>
                       )}
                       <Button 
