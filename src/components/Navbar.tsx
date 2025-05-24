@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Search, PlayIcon, MenuIcon, XIcon, LogOut, User, Bell } from 'lucide-react';
+import { Search, PlayIcon, MenuIcon, XIcon, LogOut, User, Bell, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -23,6 +22,7 @@ const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [searchFocused, setSearchFocused] = useState(false);
   const { user, profile, signOut, loading } = useAuth();
+  const { isAdmin } = useUserRole();
   const navigate = useNavigate();
 
   // Handle scroll effect
@@ -211,6 +211,12 @@ const Navbar = () => {
                         <User className="mr-2 h-4 w-4" />
                         <span>Perfil</span>
                       </DropdownMenuItem>
+                      {isAdmin() && (
+                        <DropdownMenuItem className="cursor-pointer text-gray-300 hover:text-white hover:bg-gray-800" onClick={() => navigate('/upanel')}>
+                          <Settings className="mr-2 h-4 w-4" />
+                          <span>Painel Admin</span>
+                        </DropdownMenuItem>
+                      )}
                       <DropdownMenuItem className="cursor-pointer text-gray-300 hover:text-white hover:bg-gray-800" onClick={handleSignOut}>
                         <LogOut className="mr-2 h-4 w-4" />
                         <span>Sair</span>
@@ -346,6 +352,19 @@ const Navbar = () => {
                           <p className="text-sm text-gray-400">Minha conta</p>
                         </div>
                       </div>
+                      {isAdmin() && (
+                        <Button 
+                          variant="outline" 
+                          className="w-full border-gray-700 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white rounded-xl"
+                          onClick={() => {
+                            navigate('/upanel');
+                            setIsMobileMenuOpen(false);
+                          }}
+                        >
+                          <Settings className="mr-2 h-4 w-4" />
+                          Painel Admin
+                        </Button>
+                      )}
                       <Button 
                         variant="outline" 
                         className="w-full border-gray-700 bg-white/5 text-gray-200 hover:bg-white/10 hover:text-white rounded-xl"

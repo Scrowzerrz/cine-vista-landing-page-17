@@ -19,16 +19,33 @@ export const useUserRole = () => {
 
     const fetchUserRoles = async () => {
       try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', user.id);
+        // Use a função RPC que criamos para evitar recursão infinita
+        const { data: isAdminData, error: adminError } = await supabase
+          .rpc('is_user_admin', { user_id_param: user.id });
 
-        if (error) {
-          console.error('Error fetching user roles:', error);
+        if (adminError) {
+          console.error('Error checking admin status:', adminError);
           setRoles([]);
+          setLoading(false);
+          return;
+        }
+
+        // Se é admin, buscar todas as roles do usuário
+        if (isAdminData) {
+          const { data, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', user.id);
+
+          if (error) {
+            console.error('Error fetching user roles:', error);
+            setRoles([]);
+          } else {
+            setRoles(data?.map(item => item.role as UserRole) || []);
+          }
         } else {
-          setRoles(data?.map(item => item.role as UserRole) || []);
+          // Se não é admin, verificar se tem outras roles específicas
+          setRoles(['user']); // Role padrão
         }
       } catch (error) {
         console.error('Error fetching user roles:', error);
