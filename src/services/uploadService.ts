@@ -16,6 +16,12 @@ export interface MediaUpload {
 
 export async function uploadFile(file: File, uploadType: MediaUpload['upload_type']) {
   try {
+    // Verificar se o usuário está autenticado
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     // Generate unique file name
     const fileExt = file.name.split('.').pop();
     const fileName = `${uploadType}_${Date.now()}.${fileExt}`;
@@ -39,7 +45,8 @@ export async function uploadFile(file: File, uploadType: MediaUpload['upload_typ
         file_size: file.size,
         file_type: file.type,
         upload_type: uploadType,
-        status: 'pending'
+        status: 'pending',
+        user_id: user.id
       })
       .select()
       .single();
@@ -50,7 +57,7 @@ export async function uploadFile(file: File, uploadType: MediaUpload['upload_typ
       throw dbError;
     }
 
-    return dbData;
+    return dbData as MediaUpload;
   } catch (error) {
     console.error('Error uploading file:', error);
     throw error;
@@ -68,7 +75,7 @@ export async function getAllUploads(): Promise<MediaUpload[]> {
     return [];
   }
 
-  return data || [];
+  return (data || []) as MediaUpload[];
 }
 
 export async function updateUploadStatus(id: string, status: MediaUpload['status']) {
@@ -86,7 +93,7 @@ export async function updateUploadStatus(id: string, status: MediaUpload['status
     throw error;
   }
 
-  return data;
+  return data as MediaUpload;
 }
 
 export async function deleteUpload(id: string, filePath: string) {
