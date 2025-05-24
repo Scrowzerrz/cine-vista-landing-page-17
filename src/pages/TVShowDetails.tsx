@@ -37,6 +37,14 @@ const TVShowDetails = () => {
     }));
   };
 
+  // Debug log para verificar os dados
+  useEffect(() => {
+    if (tvshow) {
+      console.log('TV Show data:', tvshow);
+      console.log('Actors:', tvshow.actors);
+    }
+  }, [tvshow]);
+
   if (isLoadingTVShow) {
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
@@ -94,9 +102,11 @@ const TVShowDetails = () => {
     plot: tvshow.plot,
     categories: tvshow.categories.map(c => c.name),
     creator: tvshow.creator || 'Não informado',
-    cast: tvshow.actors.map(a => a.name),
+    cast: tvshow.actors.length > 0 ? tvshow.actors.map(a => a.name) : ['Dados do elenco não disponíveis'],
     network: tvshow.network || 'Não informado'
   };
+
+  console.log('Formatted TV Show Info:', formattedTVShowInfo);
 
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white selection:bg-red-500 selection:text-white">

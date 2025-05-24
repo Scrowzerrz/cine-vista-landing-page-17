@@ -73,6 +73,8 @@ export async function getHomepageTVShows() {
 }
 
 export async function getTVShowDetails(id: string): Promise<TVShowWithRelations | null> {
+  console.log('Fetching TV show details for ID:', id);
+  
   const { data: tvshow, error: tvshowError } = await supabase
     .from('tvshows')
     .select('*')
@@ -84,32 +86,52 @@ export async function getTVShowDetails(id: string): Promise<TVShowWithRelations 
     return null;
   }
 
+  console.log('TV show found:', tvshow);
+
   // Buscar categorias
-  const { data: categories } = await supabase
+  const { data: categories, error: categoriesError } = await supabase
     .from('tvshow_categories')
     .select('categories(name)')
     .eq('tvshow_id', id);
 
+  if (categoriesError) {
+    console.error('Error fetching categories:', categoriesError);
+  }
+
   // Buscar atores
-  const { data: actors } = await supabase
+  const { data: actors, error: actorsError } = await supabase
     .from('tvshow_actors')
     .select('actors(name)')
     .eq('tvshow_id', id);
 
+  if (actorsError) {
+    console.error('Error fetching actors:', actorsError);
+  }
+
+  console.log('Raw actors data:', actors);
+
   // Buscar diretores
-  const { data: directors } = await supabase
+  const { data: directors, error: directorsError } = await supabase
     .from('tvshow_directors')
     .select('directors(name)')
     .eq('tvshow_id', id);
 
+  if (directorsError) {
+    console.error('Error fetching directors:', directorsError);
+  }
+
   // Buscar produtores
-  const { data: producers } = await supabase
+  const { data: producers, error: producersError } = await supabase
     .from('tvshow_producers')
     .select('producers(name)')
     .eq('tvshow_id', id);
 
+  if (producersError) {
+    console.error('Error fetching producers:', producersError);
+  }
+
   // Buscar temporadas com episódios
-  const { data: seasons } = await supabase
+  const { data: seasons, error: seasonsError } = await supabase
     .from('seasons')
     .select(`
       *,
@@ -118,10 +140,22 @@ export async function getTVShowDetails(id: string): Promise<TVShowWithRelations 
     .eq('tvshow_id', id)
     .order('season_number');
 
+  if (seasonsError) {
+    console.error('Error fetching seasons:', seasonsError);
+  }
+
+  // Processar os dados dos atores
+  const processedActors = actors?.map(item => {
+    const actor = item.actors as any;
+    return { name: actor?.name || 'Nome não disponível' };
+  }).filter(actor => actor.name !== 'Nome não disponível') || [];
+
+  console.log('Processed actors:', processedActors);
+
   return {
     ...tvshow,
     categories: categories?.map(c => ({ name: (c.categories as any)?.name })).filter(c => c.name) || [],
-    actors: actors?.map(a => ({ name: (a.actors as any)?.name })).filter(a => a.name) || [],
+    actors: processedActors,
     directors: directors?.map(d => ({ name: (d.directors as any)?.name })).filter(d => d.name) || [],
     producers: producers?.map(p => ({ name: (p.producers as any)?.name })).filter(p => p.name) || [],
     seasons: seasons?.map(season => ({
