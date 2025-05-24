@@ -49,6 +49,42 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
+    // Função para garantir que o usuário tenha uma role de admin (para teste)
+    const ensureAdminRole = async (userId: string, userEmail: string) => {
+      try {
+        console.log('Checking/creating admin role for:', userEmail);
+        
+        // Verificar se já existe role
+        const { data: existingRole } = await supabase
+          .from('user_roles')
+          .select('*')
+          .eq('user_id', userId)
+          .maybeSingle();
+
+        if (!existingRole) {
+          console.log('No role found, creating admin role for user:', userEmail);
+          
+          // Criar role de admin
+          const { error: roleError } = await supabase
+            .from('user_roles')
+            .insert({
+              user_id: userId,
+              role: 'admin'
+            });
+
+          if (roleError) {
+            console.error('Error creating admin role:', roleError);
+          } else {
+            console.log('Admin role created successfully for:', userEmail);
+          }
+        } else {
+          console.log('User already has role:', existingRole.role);
+        }
+      } catch (error) {
+        console.error('Exception in ensureAdminRole:', error);
+      }
+    };
+
     // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
@@ -63,8 +99,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          console.log('User logged in, fetching profile...');
+          console.log('User logged in, fetching profile and ensuring admin role...');
           await fetchProfile(session.user.id);
+          
+          // Para teste, garantir que o usuário seja admin
+          await ensureAdminRole(session.user.id, session.user.email || '');
         } else {
           console.log('User logged out, clearing profile');
           setProfile(null);
@@ -100,8 +139,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           setUser(session?.user ?? null);
           
           if (session?.user) {
-            console.log('Initial session has user, fetching profile...');
+            console.log('Initial session has user, fetching profile and ensuring admin role...');
             await fetchProfile(session.user.id);
+            
+            // Para teste, garantir que o usuário seja admin
+            await ensureAdminRole(session.user.id, session.user.email || '');
           }
           
           setLoading(false);

@@ -13,7 +13,12 @@ export const useUserRole = () => {
 
   useEffect(() => {
     const fetchUserRoles = async () => {
-      console.log('fetchUserRoles called with:', { user: user?.id, authLoading });
+      console.log('=== fetchUserRoles START ===');
+      console.log('Auth state:', { 
+        hasUser: !!user, 
+        userId: user?.id, 
+        authLoading 
+      });
       
       // Se ainda está carregando auth, aguardar
       if (authLoading) {
@@ -32,17 +37,19 @@ export const useUserRole = () => {
         return;
       }
 
-      console.log('Fetching roles for user:', user.id, user.email);
-
       try {
         setLoading(true);
         setError(null);
         
-        // Buscar diretamente na tabela user_roles em vez de usar RPC
+        console.log('Fetching roles for user:', user.id);
+        
+        // Buscar roles na tabela user_roles
         const { data: userRoles, error: rolesError } = await supabase
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id);
+
+        console.log('Roles query result:', { userRoles, rolesError });
 
         if (rolesError) {
           console.error('Error fetching user roles:', rolesError);
@@ -50,26 +57,24 @@ export const useUserRole = () => {
           setRoles(['user']);
           setError('Erro ao buscar roles do usuário');
         } else {
-          console.log('Raw roles data:', userRoles);
-          
           if (userRoles && userRoles.length > 0) {
             const rolesList = userRoles.map((r: any) => r.role as UserRole);
-            console.log('Processed roles:', rolesList);
+            console.log('Found roles:', rolesList);
             setRoles(rolesList);
           } else {
             // Se não tem roles específicas, é usuário comum
-            console.log('No specific roles found, setting as regular user');
+            console.log('No roles found in database, setting as regular user');
             setRoles(['user']);
           }
         }
       } catch (error) {
         console.error('Exception in fetchUserRoles:', error);
         setError('Erro ao verificar permissões');
-        // Em caso de erro, definir como usuário comum para não bloquear acesso
+        // Em caso de erro, definir como usuário comum
         setRoles(['user']);
       } finally {
         setLoading(false);
-        console.log('fetchUserRoles completed');
+        console.log('=== fetchUserRoles END ===');
       }
     };
 
@@ -90,7 +95,8 @@ export const useUserRole = () => {
     roles, 
     loading, 
     error, 
-    authLoading 
+    authLoading,
+    isAdmin: isAdmin()
   });
 
   return {
