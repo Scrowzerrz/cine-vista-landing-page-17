@@ -12,24 +12,25 @@ export const useUserRole = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Se ainda está carregando auth, manter loading
-    if (authLoading) {
-      setLoading(true);
-      setError(null);
-      return;
-    }
-
-    // Se não tem usuário, definir como usuário comum e parar loading
-    if (!user) {
-      setRoles(['user']);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    console.log('Fetching roles for user:', user.id);
-
     const fetchUserRoles = async () => {
+      // Se ainda está carregando auth, aguardar
+      if (authLoading) {
+        setLoading(true);
+        setError(null);
+        return;
+      }
+
+      // Se não tem usuário, definir como usuário comum
+      if (!user) {
+        console.log('No user, setting as regular user');
+        setRoles(['user']);
+        setLoading(false);
+        setError(null);
+        return;
+      }
+
+      console.log('Fetching roles for user:', user.id, user.email);
+
       try {
         setLoading(true);
         setError(null);
@@ -40,13 +41,14 @@ export const useUserRole = () => {
 
         if (adminError) {
           console.error('Error checking admin status:', adminError);
-          // Se houver erro, definir como usuário comum
+          // Se houver erro, definir como usuário comum mas não travar
           setRoles(['user']);
+          setError('Erro ao verificar permissões de admin');
           setLoading(false);
           return;
         }
 
-        console.log('Is admin:', isAdminData);
+        console.log('Is admin check result:', isAdminData);
 
         if (isAdminData) {
           // Se é admin, buscar todas as roles
@@ -57,15 +59,17 @@ export const useUserRole = () => {
 
           if (rolesError) {
             console.error('Error fetching user roles:', rolesError);
-            // Se houver erro mas sabemos que é admin, pelo menos dar role de admin
+            // Se houver erro mas sabemos que é admin, dar pelo menos role de admin
             setRoles(['admin']);
+            setError('Erro ao buscar roles detalhadas');
           } else {
             const userRoles = rolesData?.map(item => item.role as UserRole) || ['admin'];
             setRoles(userRoles);
-            console.log('User roles:', userRoles);
+            console.log('User roles loaded:', userRoles);
           }
         } else {
           // Se não é admin, definir como usuário comum
+          console.log('User is not admin, setting as regular user');
           setRoles(['user']);
         }
       } catch (error) {
@@ -79,11 +83,24 @@ export const useUserRole = () => {
     };
 
     fetchUserRoles();
-  }, [user?.id, authLoading]); // Usar user.id como dependência específica
+  }, [user?.id, authLoading]); // Dependências específicas para evitar loops
 
-  const hasRole = (role: UserRole) => roles.includes(role);
+  const hasRole = (role: UserRole) => {
+    const result = roles.includes(role);
+    console.log(`Checking role ${role}:`, result, 'Current roles:', roles);
+    return result;
+  };
+  
   const isAdmin = () => hasRole('admin');
   const isModerator = () => hasRole('moderator');
+
+  console.log('useUserRole state:', { 
+    userId: user?.id, 
+    roles, 
+    loading, 
+    error, 
+    authLoading 
+  });
 
   return {
     roles,

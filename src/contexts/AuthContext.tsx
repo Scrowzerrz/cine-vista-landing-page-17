@@ -25,26 +25,56 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Função para buscar perfil do usuário
     const fetchProfile = async (userId: string) => {
       try {
-        const { data } = await supabase
+        console.log('Fetching profile for user:', userId);
+        const { data, error } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', userId)
           .maybeSingle();
         
+        if (error) {
+          console.error('Error fetching profile:', error);
+        }
+        
         if (mounted) {
           setProfile(data);
+          console.log('Profile loaded:', data);
         }
       } catch (error) {
-        console.error('Error fetching profile:', error);
+        console.error('Error in fetchProfile:', error);
         if (mounted) {
           setProfile(null);
         }
       }
     };
 
-    // Primeiro, verificar sessão existente
+    // Configurar listener de mudanças de auth PRIMEIRO
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log('Auth state changed:', event, !!session, session?.user?.email);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (session?.user) {
+          // Buscar perfil quando usuário faz login
+          await fetchProfile(session.user.id);
+        } else {
+          // Limpar perfil quando usuário faz logout
+          setProfile(null);
+        }
+        
+        // Sempre marcar como não carregando após processar mudança de auth
+        setLoading(false);
+      }
+    );
+
+    // Depois verificar sessão existente
     const getInitialSession = async () => {
       try {
+        console.log('Getting initial session...');
         const { data: { session }, error } = await supabase.auth.getSession();
         
         if (error) {
@@ -57,6 +87,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           }
           return;
         }
+
+        console.log('Initial session:', !!session, session?.user?.email);
 
         if (mounted) {
           setSession(session);
@@ -79,29 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Configurar listener de mudanças de auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        console.log('Auth state changed:', event, !!session);
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          await fetchProfile(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          setProfile(null);
-        }
-        
-        // Só marcar como não carregando se não foi um evento de inicialização
-        if (event !== 'INITIAL_SESSION') {
-          setLoading(false);
-        }
-      }
-    );
-
     // Inicializar sessão
     getInitialSession();
 
@@ -113,16 +122,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signOut = async () => {
-    setLoading(true);
+    console.log('Signing out...');
     try {
       const { error } = await supabase.auth.signOut();
       if (error) {
         console.error('Error signing out:', error);
+      } else {
+        console.log('Signed out successfully');
       }
     } catch (error) {
       console.error('Error in signOut:', error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -133,6 +142,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     loading,
     signOut,
   };
+
+  console.log('AuthContext state:', { 
+    hasUser: !!user, 
+    hasSession: !!session, 
+    hasProfile: !!profile, 
+    loading 
+  });
 
   return (
     <AuthContext.Provider value={value}>

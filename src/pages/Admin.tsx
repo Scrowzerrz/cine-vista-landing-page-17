@@ -12,8 +12,18 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading, error: roleError } = useUserRole();
 
+  console.log('Admin page state:', { 
+    hasUser: !!user, 
+    userEmail: user?.email,
+    authLoading, 
+    roleLoading, 
+    isAdminResult: isAdmin(),
+    roleError 
+  });
+
   // Se está carregando autenticação, mostrar loading
   if (authLoading) {
+    console.log('Admin: showing auth loading');
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
         <Navbar />
@@ -35,11 +45,13 @@ const Admin = () => {
 
   // Se não está autenticado, redirecionar para login
   if (!user) {
+    console.log('Admin: no user, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
   // Se ainda está verificando roles, mostrar loading específico
   if (roleLoading) {
+    console.log('Admin: showing role loading');
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">
         <Navbar />
@@ -62,15 +74,22 @@ const Admin = () => {
     );
   }
 
-  // Se houve erro na verificação de roles, mostrar erro mas permitir acesso
+  // Se houve erro na verificação de roles, mostrar erro mas permitir acesso se for admin
   if (roleError) {
-    console.warn('Role verification error, allowing access:', roleError);
+    console.warn('Admin: role verification error:', roleError);
   }
 
+  // Verificar se é admin
+  const userIsAdmin = isAdmin();
+  console.log('Admin: final admin check:', userIsAdmin);
+
   // Se não é admin, redirecionar para home
-  if (!isAdmin()) {
+  if (!userIsAdmin) {
+    console.log('Admin: user is not admin, redirecting to home');
     return <Navigate to="/" replace />;
   }
+
+  console.log('Admin: rendering admin panel');
 
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">
