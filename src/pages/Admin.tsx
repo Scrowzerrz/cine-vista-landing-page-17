@@ -10,10 +10,10 @@ import { motion } from 'framer-motion';
 
 const Admin = () => {
   const { user, loading: authLoading } = useAuth();
-  const { isAdmin, loading: roleLoading } = useUserRole();
+  const { isAdmin, loading: roleLoading, error: roleError } = useUserRole();
 
-  // Show loading while checking authentication and roles
-  if (authLoading || roleLoading) {
+  // Se está carregando autenticação, mostrar loading
+  if (authLoading) {
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
         <Navbar />
@@ -27,18 +27,47 @@ const Admin = () => {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"
           />
-          <span className="text-gray-400">Verificando permissões...</span>
+          <span className="text-gray-400">Carregando...</span>
         </motion.div>
       </div>
     );
   }
 
-  // Redirect if not authenticated
+  // Se não está autenticado, redirecionar para login
   if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
-  // Redirect if not admin
+  // Se ainda está verificando roles, mostrar loading específico
+  if (roleLoading) {
+    return (
+      <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">
+        <Navbar />
+        <main className="pt-20 pb-12 flex items-center justify-center min-h-screen">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="flex flex-col items-center gap-4"
+          >
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"
+            />
+            <span className="text-gray-400">Verificando permissões...</span>
+          </motion.div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
+  // Se houve erro na verificação de roles, mostrar erro mas permitir acesso
+  if (roleError) {
+    console.warn('Role verification error, allowing access:', roleError);
+  }
+
+  // Se não é admin, redirecionar para home
   if (!isAdmin()) {
     return <Navigate to="/" replace />;
   }
