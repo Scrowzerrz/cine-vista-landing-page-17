@@ -12,14 +12,14 @@ const Admin = () => {
   const { user, loading: authLoading } = useAuth();
   const { isAdmin, loading: roleLoading, error: roleError } = useUserRole();
 
-  console.log('=== ADMIN PAGE RENDER ===');
-  console.log('Auth state:', { 
+  console.log('🎭 === ADMIN PAGE RENDER ===');
+  console.log('🔐 Auth state:', { 
     hasUser: !!user, 
     userEmail: user?.email,
     userId: user?.id,
     authLoading 
   });
-  console.log('Role state:', { 
+  console.log('👑 Role state:', { 
     roleLoading, 
     isAdminResult: isAdmin(),
     roleError 
@@ -27,7 +27,7 @@ const Admin = () => {
 
   // Aguardar autenticação ser carregada
   if (authLoading) {
-    console.log('Admin: Auth loading...');
+    console.log('⏳ Admin: Auth loading...');
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white flex items-center justify-center">
         <Navbar />
@@ -49,13 +49,13 @@ const Admin = () => {
 
   // Se não está autenticado
   if (!user) {
-    console.log('Admin: No user found, redirecting to auth');
+    console.log('🚫 Admin: No user found, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
   // Aguardar verificação de roles
   if (roleLoading) {
-    console.log('Admin: Role verification loading...');
+    console.log('⏳ Admin: Role verification loading...');
     return (
       <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">
         <Navbar />
@@ -80,15 +80,15 @@ const Admin = () => {
 
   // Verificar se é admin
   const userIsAdmin = isAdmin();
-  console.log('Admin: Final admin check result:', userIsAdmin);
+  console.log('👑 Admin: Final admin check result:', userIsAdmin);
 
   // Se não é admin, redirecionar
   if (!userIsAdmin) {
-    console.log('Admin: User is not admin, redirecting to home');
+    console.log('🚫 Admin: User is not admin, redirecting to home');
     return <Navigate to="/" replace />;
   }
 
-  console.log('Admin: Rendering admin panel for user:', user.email);
+  console.log('✅ Admin: Rendering admin panel for user:', user.email);
 
   return (
     <div className="bg-gradient-to-b from-gray-900 to-gray-950 min-h-screen text-white">
