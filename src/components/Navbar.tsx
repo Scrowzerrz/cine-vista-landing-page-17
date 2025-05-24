@@ -4,6 +4,7 @@ import { Search, PlayIcon, MenuIcon, XIcon, LogOut, User, Bell } from 'lucide-re
 import { Button } from '@/components/ui/button';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserRole } from '@/hooks/useUserRole';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   DropdownMenu,
