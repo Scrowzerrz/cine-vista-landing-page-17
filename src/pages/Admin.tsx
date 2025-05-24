@@ -27,7 +27,7 @@ const Admin = () => {
             transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
             className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"
           />
-          <span className="text-gray-400">Carregando...</span>
+          <span className="text-gray-400">Carregando autenticação...</span>
         </motion.div>
       </div>
     );
@@ -54,7 +54,7 @@ const Admin = () => {
               transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
               className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"
             />
-            <span className="text-gray-400">Verificando permissões...</span>
+            <span className="text-gray-400">Verificando permissões para {user.email}...</span>
           </motion.div>
         </main>
         <Footer />

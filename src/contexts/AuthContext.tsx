@@ -29,7 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .from('profiles')
           .select('*')
           .eq('id', userId)
-          .maybeSingle(); // Use maybeSingle para evitar erro se não existir
+          .maybeSingle();
         
         if (mounted) {
           setProfile(data);
@@ -42,30 +42,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     };
 
-    // Configurar listener de mudanças de auth PRIMEIRO
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (!mounted) return;
-
-        console.log('Auth state changed:', event, !!session);
-        
-        setSession(session);
-        setUser(session?.user ?? null);
-        
-        if (event === 'SIGNED_IN' && session?.user) {
-          // Buscar perfil quando fizer login
-          await fetchProfile(session.user.id);
-        } else if (event === 'SIGNED_OUT') {
-          // Limpar dados quando fizer logout
-          setProfile(null);
-        }
-        
-        // Marcar loading como false após processar mudança de auth
-        setLoading(false);
-      }
-    );
-
-    // Verificar sessão inicial DEPOIS de configurar o listener
+    // Primeiro, verificar sessão existente
     const getInitialSession = async () => {
       try {
         const { data: { session }, error } = await supabase.auth.getSession();
@@ -73,6 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         if (error) {
           console.error('Error getting session:', error);
           if (mounted) {
+            setSession(null);
+            setUser(null);
+            setProfile(null);
             setLoading(false);
           }
           return;
@@ -91,11 +71,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       } catch (error) {
         console.error('Error in getInitialSession:', error);
         if (mounted) {
+          setSession(null);
+          setUser(null);
+          setProfile(null);
           setLoading(false);
         }
       }
     };
 
+    // Configurar listener de mudanças de auth
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (!mounted) return;
+
+        console.log('Auth state changed:', event, !!session);
+        
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        if (event === 'SIGNED_IN' && session?.user) {
+          await fetchProfile(session.user.id);
+        } else if (event === 'SIGNED_OUT') {
+          setProfile(null);
+        }
+        
+        // Só marcar como não carregando se não foi um evento de inicialização
+        if (event !== 'INITIAL_SESSION') {
+          setLoading(false);
+        }
+      }
+    );
+
+    // Inicializar sessão
     getInitialSession();
 
     // Cleanup

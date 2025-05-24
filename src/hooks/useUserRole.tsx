@@ -12,25 +12,29 @@ export const useUserRole = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Se ainda está carregando auth ou não tem usuário, resetar estado
+    // Se ainda está carregando auth, manter loading
     if (authLoading) {
       setLoading(true);
+      setError(null);
       return;
     }
 
+    // Se não tem usuário, definir como usuário comum e parar loading
     if (!user) {
-      setRoles([]);
+      setRoles(['user']);
       setLoading(false);
       setError(null);
       return;
     }
+
+    console.log('Fetching roles for user:', user.id);
 
     const fetchUserRoles = async () => {
       try {
         setLoading(true);
         setError(null);
         
-        // Primeiro verificar se é admin usando a função RPC
+        // Verificar se é admin usando a função RPC
         const { data: isAdminData, error: adminError } = await supabase
           .rpc('is_user_admin', { user_id_param: user.id });
 
@@ -41,6 +45,8 @@ export const useUserRole = () => {
           setLoading(false);
           return;
         }
+
+        console.log('Is admin:', isAdminData);
 
         if (isAdminData) {
           // Se é admin, buscar todas as roles
@@ -56,6 +62,7 @@ export const useUserRole = () => {
           } else {
             const userRoles = rolesData?.map(item => item.role as UserRole) || ['admin'];
             setRoles(userRoles);
+            console.log('User roles:', userRoles);
           }
         } else {
           // Se não é admin, definir como usuário comum
@@ -72,7 +79,7 @@ export const useUserRole = () => {
     };
 
     fetchUserRoles();
-  }, [user, authLoading]); // Dependências específicas para evitar loops
+  }, [user?.id, authLoading]); // Usar user.id como dependência específica
 
   const hasRole = (role: UserRole) => roles.includes(role);
   const isAdmin = () => hasRole('admin');
