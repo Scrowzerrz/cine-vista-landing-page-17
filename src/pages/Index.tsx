@@ -8,17 +8,42 @@ import ContentCarouselWrapper from '../components/ContentCarouselWrapper';
 import Footer from '../components/Footer';
 import { getHomePageMovies } from '@/services/homeService';
 import { getHomepageTVShows } from '@/services/tvshowService';
+import { useAuth } from '@/contexts/AuthContext';
 
 const Index = () => {
+  const { loading: authLoading } = useAuth();
+
   const { data: moviesData = [], isLoading: isLoadingMovies } = useQuery({
     queryKey: ['homePageMovies'],
-    queryFn: getHomePageMovies
+    queryFn: getHomePageMovies,
+    enabled: !authLoading
   });
 
   const { data: seriesData = [], isLoading: isLoadingSeries } = useQuery({
     queryKey: ['homepageTVShows'],
-    queryFn: getHomepageTVShows
+    queryFn: getHomepageTVShows,
+    enabled: !authLoading
   });
+
+  // Loading screen while auth is processing
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white flex items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="flex flex-col items-center gap-4"
+        >
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full"
+          />
+          <span className="text-gray-400 text-lg">Carregando...</span>
+        </motion.div>
+      </div>
+    );
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },

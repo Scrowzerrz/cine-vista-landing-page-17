@@ -11,22 +11,24 @@ import Comments from '@/components/movie/Comments';
 import SeasonsAndEpisodes from '@/components/tvshow/SeasonsAndEpisodes';
 import { motion } from 'framer-motion';
 import { getTVShowDetails, getRelatedTVShows } from '@/services/tvshowService';
+import { useAuth } from '@/contexts/AuthContext';
 
 const TVShowDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [selectedSeason, setSelectedSeason] = useState("1");
   const [expandedEpisodes, setExpandedEpisodes] = useState<Record<string, boolean>>({});
+  const { loading: authLoading } = useAuth();
   
   const { data: tvshow, isLoading: isLoadingTVShow } = useQuery({
     queryKey: ['tvshow', id],
     queryFn: () => getTVShowDetails(id!),
-    enabled: !!id
+    enabled: !!id && !authLoading
   });
 
   const { data: relatedShows = [] } = useQuery({
     queryKey: ['relatedTVShows', id],
     queryFn: () => getRelatedTVShows(id!),
-    enabled: !!id
+    enabled: !!id && !authLoading
   });
 
   // Toggle expanded episodes state

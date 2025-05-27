@@ -12,15 +12,17 @@ import Comments from '@/components/movie/Comments';
 import { getMovieById } from '@/services/movieService';
 import { MovieWithRelations } from '@/types/movie';
 import MoviePlayer from '@/components/movie/MoviePlayer';
+import { useAuth } from '@/contexts/AuthContext';
 
 const MovieDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [isPlayerOpen, setIsPlayerOpen] = useState(false);
+  const { loading: authLoading } = useAuth();
   
   const { data: movie, isLoading, error } = useQuery({
     queryKey: ['movie', id],
     queryFn: () => getMovieById(id || ''),
-    enabled: !!id,
+    enabled: !!id && !authLoading,
   });
   
   useEffect(() => {
