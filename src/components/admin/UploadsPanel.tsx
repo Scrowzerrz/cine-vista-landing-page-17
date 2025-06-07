@@ -10,10 +10,9 @@ import {
   CheckCircle, 
   XCircle,
   RefreshCw,
-  Edit
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { getAllUploads, updateUploadStatus, deleteUpload, MediaUpload } from '@/services/uploadService';
 import { toast } from '@/hooks/use-toast';
 import FileUpload from './FileUpload';
@@ -22,7 +21,6 @@ import TVShowUpload from './TVShowUpload';
 import UploadCard from './UploadCard';
 import StatsCard from './StatsCard';
 import MediaGrid from './MediaGrid';
-import ContentEditor from './ContentEditor';
 
 const UploadsPanel: React.FC = () => {
   const [uploads, setUploads] = useState<MediaUpload[]>([]);
@@ -150,147 +148,121 @@ const UploadsPanel: React.FC = () => {
         </Button>
       </motion.div>
 
-      {/* Main Tabs */}
-      <Tabs defaultValue="uploads" className="w-full">
-        <TabsList className="bg-gray-900 border-gray-700 mb-8">
-          <TabsTrigger 
-            value="uploads" 
-            className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard
+          title="Total de Arquivos"
+          value={stats.total}
+          icon={FileImage}
+          color="from-blue-600 to-blue-800"
+          delay={0}
+        />
+        <StatsCard
+          title="Pendentes"
+          value={stats.pending}
+          icon={Clock}
+          color="from-yellow-600 to-orange-600"
+          delay={0.1}
+        />
+        <StatsCard
+          title="Aprovados"
+          value={stats.approved}
+          icon={CheckCircle}
+          color="from-emerald-600 to-green-600"
+          delay={0.2}
+        />
+        <StatsCard
+          title="Rejeitados"
+          value={stats.rejected}
+          icon={XCircle}
+          color="from-red-600 to-pink-600"
+          delay={0.3}
+        />
+      </div>
+
+      {/* Upload Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <UploadCard
+          title="Upload de Filmes"
+          description="Adicione novos filmes à plataforma"
+          icon={Film}
+          color="from-purple-600 to-indigo-700"
+          isExpanded={expandedCards.movies}
+          onToggle={() => toggleCard('movies')}
+        >
+          <MovieUpload />
+        </UploadCard>
+
+        <UploadCard
+          title="Upload de Séries"
+          description="Gerencie séries e episódios"
+          icon={Tv}
+          color="from-emerald-600 to-teal-700"
+          isExpanded={expandedCards.tvshows}
+          onToggle={() => toggleCard('tvshows')}
+        >
+          <TVShowUpload />
+        </UploadCard>
+
+        <UploadCard
+          title="Upload de Mídia"
+          description="Envie imagens e outros arquivos"
+          icon={Upload}
+          color="from-orange-600 to-red-700"
+          isExpanded={expandedCards.media}
+          onToggle={() => toggleCard('media')}
+        >
+          <FileUpload onUploadSuccess={loadUploads} />
+        </UploadCard>
+      </div>
+
+      {/* Filter Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="flex items-center gap-4 bg-gray-900/50 backdrop-blur-sm rounded-xl p-2 border border-gray-700/50"
+      >
+        {[
+          { key: 'all', label: 'Todos', count: stats.total },
+          { key: 'pending', label: 'Pendentes', count: stats.pending },
+          { key: 'approved', label: 'Aprovados', count: stats.approved },
+          { key: 'rejected', label: 'Rejeitados', count: stats.rejected }
+        ].map((filter) => (
+          <button
+            key={filter.key}
+            onClick={() => setActiveFilter(filter.key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              activeFilter === filter.key
+                ? 'bg-red-600 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+            }`}
           >
-            <Upload className="w-4 h-4 mr-2" />
-            Uploads
-          </TabsTrigger>
-          <TabsTrigger 
-            value="editor"
-            className="data-[state=active]:bg-red-600 data-[state=active]:text-white text-gray-300"
-          >
-            <Edit className="w-4 h-4 mr-2" />
-            Editor de Conteúdo
-          </TabsTrigger>
-        </TabsList>
+            <span>{filter.label}</span>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              activeFilter === filter.key 
+                ? 'bg-white/20' 
+                : 'bg-gray-700'
+            }`}>
+              {filter.count}
+            </span>
+          </button>
+        ))}
+      </motion.div>
 
-        <TabsContent value="uploads" className="space-y-8">
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatsCard
-              title="Total de Arquivos"
-              value={stats.total}
-              icon={FileImage}
-              color="from-blue-600 to-blue-800"
-              delay={0}
-            />
-            <StatsCard
-              title="Pendentes"
-              value={stats.pending}
-              icon={Clock}
-              color="from-yellow-600 to-orange-600"
-              delay={0.1}
-            />
-            <StatsCard
-              title="Aprovados"
-              value={stats.approved}
-              icon={CheckCircle}
-              color="from-emerald-600 to-green-600"
-              delay={0.2}
-            />
-            <StatsCard
-              title="Rejeitados"
-              value={stats.rejected}
-              icon={XCircle}
-              color="from-red-600 to-pink-600"
-              delay={0.3}
-            />
-          </div>
-
-          {/* Upload Cards */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <UploadCard
-              title="Upload de Filmes"
-              description="Adicione novos filmes à plataforma"
-              icon={Film}
-              color="from-purple-600 to-indigo-700"
-              isExpanded={expandedCards.movies}
-              onToggle={() => toggleCard('movies')}
-            >
-              <MovieUpload />
-            </UploadCard>
-
-            <UploadCard
-              title="Upload de Séries"
-              description="Gerencie séries e episódios"
-              icon={Tv}
-              color="from-emerald-600 to-teal-700"
-              isExpanded={expandedCards.tvshows}
-              onToggle={() => toggleCard('tvshows')}
-            >
-              <TVShowUpload />
-            </UploadCard>
-
-            <UploadCard
-              title="Upload de Mídia"
-              description="Envie imagens e outros arquivos"
-              icon={Upload}
-              color="from-orange-600 to-red-700"
-              isExpanded={expandedCards.media}
-              onToggle={() => toggleCard('media')}
-            >
-              <FileUpload onUploadSuccess={loadUploads} />
-            </UploadCard>
-          </div>
-
-          {/* Filter Tabs */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center gap-4 bg-gray-900/50 backdrop-blur-sm rounded-xl p-2 border border-gray-700/50"
-          >
-            {[
-              { key: 'all', label: 'Todos', count: stats.total },
-              { key: 'pending', label: 'Pendentes', count: stats.pending },
-              { key: 'approved', label: 'Aprovados', count: stats.approved },
-              { key: 'rejected', label: 'Rejeitados', count: stats.rejected }
-            ].map((filter) => (
-              <button
-                key={filter.key}
-                onClick={() => setActiveFilter(filter.key)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
-                  activeFilter === filter.key
-                    ? 'bg-red-600 text-white'
-                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                }`}
-              >
-                <span>{filter.label}</span>
-                <span className={`text-xs px-2 py-1 rounded-full ${
-                  activeFilter === filter.key 
-                    ? 'bg-white/20' 
-                    : 'bg-gray-700'
-                }`}>
-                  {filter.count}
-                </span>
-              </button>
-            ))}
-          </motion.div>
-
-          {/* Media Grid */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
-            <MediaGrid
-              uploads={filteredUploads(activeFilter)}
-              onStatusUpdate={handleStatusUpdate}
-              onDelete={handleDelete}
-              updatingStatus={updatingStatus}
-            />
-          </motion.div>
-        </TabsContent>
-
-        <TabsContent value="editor" className="space-y-8">
-          <ContentEditor />
-        </TabsContent>
-      </Tabs>
+      {/* Media Grid */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <MediaGrid
+          uploads={filteredUploads(activeFilter)}
+          onStatusUpdate={handleStatusUpdate}
+          onDelete={handleDelete}
+          updatingStatus={updatingStatus}
+        />
+      </motion.div>
     </div>
   );
 };
