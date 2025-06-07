@@ -184,12 +184,12 @@ const TVShowUpload: React.FC = () => {
       if (!savedTvShow || !savedTvShow.id) throw new Error("Falha ao salvar a série ou obter seu ID.");
       const tvShowId = savedTvShow.id;
 
-      // Lógica para atores, diretores, etc. (usando supabase diretamente por enquanto, como no original)
+      // Fixed logic for actors, directors, etc.
       const relatedDataActions = [
-        ...actors.filter(name => name.trim()).map(name => ({ table: 'actors', data: { name: name.trim() }, linkTable: 'tvshow_actors', linkField: 'actor_id' })),
-        ...directors.filter(name => name.trim()).map(name => ({ table: 'directors', data: { name: name.trim() }, linkTable: 'tvshow_directors', linkField: 'director_id' })),
-        ...producers.filter(name => name.trim()).map(name => ({ table: 'producers', data: { name: name.trim() }, linkTable: 'tvshow_producers', linkField: 'producer_id' })),
-        ...categories.filter(name => name.trim()).map(name => ({ table: 'categories', data: { name: name.trim() }, linkTable: 'tvshow_categories', linkField: 'category_id' })),
+        ...actors.filter(name => name.trim()).map(name => ({ table: 'actors' as const, data: { name: name.trim() }, linkTable: 'tvshow_actors' as const, linkField: 'actor_id' as const })),
+        ...directors.filter(name => name.trim()).map(name => ({ table: 'directors' as const, data: { name: name.trim() }, linkTable: 'tvshow_directors' as const, linkField: 'director_id' as const })),
+        ...producers.filter(name => name.trim()).map(name => ({ table: 'producers' as const, data: { name: name.trim() }, linkTable: 'tvshow_producers' as const, linkField: 'producer_id' as const })),
+        ...categories.filter(name => name.trim()).map(name => ({ table: 'categories' as const, data: { name: name.trim() }, linkTable: 'tvshow_categories' as const, linkField: 'category_id' as const })),
       ];
 
       for (const item of relatedDataActions) {
@@ -203,7 +203,6 @@ const TVShowUpload: React.FC = () => {
           await supabase.from(item.linkTable).insert({ tvshow_id: tvShowId, [item.linkField]: relatedItemData.id });
         }
       }
-      // Fim da lógica de atores, etc.
 
       if (formData.formSeasons && formData.formSeasons.length > 0) {
         for (const seasonFormData of formData.formSeasons) {
@@ -447,14 +446,13 @@ const TVShowUpload: React.FC = () => {
                       </Button>
                     </div>
                     
-                    {/* Episodes Section */}
                     <div className="ml-0 md:ml-4 mt-4 space-y-3 border-t border-gray-700 pt-3">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="text-md font-semibold text-gray-200">Episódios</h4>
                         <Button 
                           type="button" 
                           variant="outline" 
-                          size="xs" 
+                          size="sm" 
                           onClick={() => appendEpisode({...getDefaultEpisodeValue(), episode_number: episodeFields.length + 1})} 
                           className="text-gray-300 border-gray-600 hover:bg-gray-700 text-xs"
                         >
@@ -471,7 +469,7 @@ const TVShowUpload: React.FC = () => {
                             <Button 
                               type="button" 
                               variant="ghost" 
-                              size="xs" 
+                              size="sm" 
                               onClick={() => removeEpisode(episodeIndex)} 
                               disabled={episodeFields.length === 1} 
                               className="text-red-500 hover:text-red-400 text-xs p-1"

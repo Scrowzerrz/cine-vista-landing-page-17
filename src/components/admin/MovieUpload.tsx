@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Upload, Film, Plus, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -11,11 +10,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
-// Removido import direto do supabase client, pois saveMovie o utiliza
+import { supabase } from '@/integrations/supabase/client';
 import { saveMovie } from '@/services/uploadService';
 import type { Movie } from '@/types/movie';
 import ControlledImageUpload from './ControlledImageUpload';
-import ControlledVideoUpload from './ControlledVideoUpload'; // Importando ControlledVideoUpload
+import ControlledVideoUpload from './ControlledVideoUpload';
 
 const movieSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -91,7 +90,7 @@ const MovieUpload: React.FC = () => {
       plot: '',
       poster: null,
       backdrop: null,
-      playerUrl: null, // Modificado para null
+      playerUrl: null,
     }
   });
 
@@ -157,12 +156,6 @@ const MovieUpload: React.FC = () => {
   const onSubmit = async (formData: MovieFormData) => {
     setLoading(true);
     try {
-      // 1. Preparar o payload para saveMovie
-      // A função saveMovie espera um objeto Partial<Movie>
-      // Os campos em MovieFormData são: title, originalTitle, year, duration, rating, quality, plot, poster, backdrop, playerUrl
-      // Os campos em Movie (type) são: title, original_title, year, duration, rating, plot, poster, backdrop, quality, player_url
-      // O mapeamento é direto para a maioria, mas `poster` e `backdrop` no `saveMovie` são mapeados para `poster_url` e `backdrop_url`.
-      // A função `saveMovie` já lida com esse mapeamento interno (poster -> poster_url, backdrop -> backdrop_url).
       const moviePayload: Partial<Movie> = {
         title: formData.title,
         original_title: formData.originalTitle,
@@ -171,8 +164,8 @@ const MovieUpload: React.FC = () => {
         rating: formData.rating,
         quality: formData.quality,
         plot: formData.plot,
-        poster: formData.poster, // saveMovie irá mapear para poster_url
-        backdrop: formData.backdrop, // saveMovie irá mapear para backdrop_url
+        poster: formData.poster,
+        backdrop: formData.backdrop,
         player_url: formData.playerUrl,
       };
 
@@ -183,7 +176,6 @@ const MovieUpload: React.FC = () => {
       }
       const movieId = savedMovie.id;
 
-      // O restante da lógica para salvar atores, diretores, etc., continua aqui, usando o movieId
       // Insert actors
       if (actors.some(actor => actor.trim())) {
         const actorNames = actors.filter(actor => actor.trim());
@@ -272,7 +264,7 @@ const MovieUpload: React.FC = () => {
       console.error('Error uploading movie:', error);
       let errorMessage = 'Erro ao adicionar filme. Tente novamente.';
       if (error instanceof Error) {
-        errorMessage = error.message; // Usar a mensagem da exceção se disponível
+        errorMessage = error.message;
       }
       toast({
         title: 'Erro no Envio',
@@ -449,7 +441,7 @@ const MovieUpload: React.FC = () => {
                       <ControlledImageUpload
                         value={field.value}
                         onChange={field.onChange}
-                        className="h-48 w-full" // Ajuste a altura/largura conforme necessário
+                        className="h-48 w-full"
                       />
                     </FormControl>
                     <FormMessage />
@@ -467,7 +459,7 @@ const MovieUpload: React.FC = () => {
                        <ControlledImageUpload
                         value={field.value}
                         onChange={field.onChange}
-                        className="h-48 w-full" // Ajuste a altura/largura conforme necessário
+                        className="h-48 w-full"
                       />
                     </FormControl>
                     <FormMessage />
@@ -486,7 +478,7 @@ const MovieUpload: React.FC = () => {
                     <ControlledVideoUpload
                       value={field.value}
                       onChange={field.onChange}
-                      className="h-auto w-full min-h-[100px]" // Ajuste a altura/largura conforme necessário
+                      className="h-auto w-full min-h-[100px]"
                     />
                   </FormControl>
                   <FormMessage />
