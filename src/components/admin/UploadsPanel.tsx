@@ -1,20 +1,37 @@
 
 import React, { useState, useEffect } from 'react';
-import { FileImage, Check, X, Trash2, Eye, Film, Tv, Upload } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { 
+  FileImage, 
+  Film, 
+  Tv, 
+  Upload, 
+  Clock, 
+  CheckCircle, 
+  XCircle,
+  RefreshCw,
+  TrendingUp
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { getAllUploads, updateUploadStatus, deleteUpload, getFileUrl, MediaUpload } from '@/services/uploadService';
+import { getAllUploads, updateUploadStatus, deleteUpload, MediaUpload } from '@/services/uploadService';
 import { toast } from '@/hooks/use-toast';
 import FileUpload from './FileUpload';
 import MovieUpload from './MovieUpload';
 import TVShowUpload from './TVShowUpload';
+import UploadCard from './UploadCard';
+import StatsCard from './StatsCard';
+import MediaGrid from './MediaGrid';
 
 const UploadsPanel: React.FC = () => {
   const [uploads, setUploads] = useState<MediaUpload[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
+    movies: false,
+    tvshows: false,
+    media: false
+  });
 
   const loadUploads = async () => {
     try {
@@ -79,200 +96,173 @@ const UploadsPanel: React.FC = () => {
     }
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'approved':
-        return <Badge className="bg-green-100 text-green-800">Aprovado</Badge>;
-      case 'rejected':
-        return <Badge className="bg-red-100 text-red-800">Rejeitado</Badge>;
-      default:
-        return <Badge className="bg-yellow-100 text-yellow-800">Pendente</Badge>;
-    }
-  };
-
-  const getTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-      'movie_poster': 'Poster de Filme',
-      'movie_backdrop': 'Backdrop de Filme',
-      'tvshow_poster': 'Poster de Série',
-      'tvshow_backdrop': 'Backdrop de Série',
-      'episode_poster': 'Poster de Episódio'
-    };
-    return types[type] || type;
+  const toggleCard = (cardName: string) => {
+    setExpandedCards(prev => ({
+      ...prev,
+      [cardName]: !prev[cardName]
+    }));
   };
 
   const filteredUploads = (status?: string) => {
-    if (!status) return uploads;
+    if (!status || status === 'all') return uploads;
     return uploads.filter(upload => upload.status === status);
   };
 
-  const UploadsList = ({ uploads }: { uploads: MediaUpload[] }) => (
-    <div className="space-y-4">
-      {uploads.length === 0 ? (
-        <p className="text-center text-gray-500 py-8">Nenhum upload encontrado.</p>
-      ) : (
-        uploads.map((upload) => (
-          <Card key={upload.id} className="bg-gray-900 border-gray-800">
-            <CardContent className="p-6">
-              <div className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <img
-                    src={getFileUrl(upload.file_path)}
-                    alt={upload.file_name}
-                    className="w-24 h-24 object-cover rounded-lg"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = '/placeholder.svg';
-                    }}
-                  />
-                </div>
-                
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-medium text-white truncate">
-                        {upload.file_name}
-                      </h3>
-                      <p className="text-sm text-gray-400 mt-1">
-                        {getTypeLabel(upload.upload_type)}
-                      </p>
-                      <p className="text-sm text-gray-500 mt-1">
-                        {(upload.file_size / 1024 / 1024).toFixed(2)} MB
-                      </p>
-                      <p className="text-sm text-gray-500">
-                        {new Date(upload.created_at).toLocaleDateString('pt-BR')}
-                      </p>
-                    </div>
-                    
-                    <div className="flex flex-col items-end space-y-2">
-                      {getStatusBadge(upload.status)}
-                      
-                      <div className="flex space-x-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => window.open(getFileUrl(upload.file_path), '_blank')}
-                          className="text-blue-400 hover:text-blue-300"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        
-                        {upload.status === 'pending' && (
-                          <>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleStatusUpdate(upload.id, 'approved')}
-                              disabled={updatingStatus === upload.id}
-                              className="text-green-400 hover:text-green-300"
-                            >
-                              <Check className="w-4 h-4" />
-                            </Button>
-                            
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleStatusUpdate(upload.id, 'rejected')}
-                              disabled={updatingStatus === upload.id}
-                              className="text-red-400 hover:text-red-300"
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          </>
-                        )}
-                        
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleDelete(upload.id, upload.file_path)}
-                          className="text-red-400 hover:text-red-300"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))
-      )}
-    </div>
-  );
+  const stats = {
+    total: uploads.length,
+    pending: uploads.filter(u => u.status === 'pending').length,
+    approved: uploads.filter(u => u.status === 'approved').length,
+    rejected: uploads.filter(u => u.status === 'rejected').length
+  };
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-8">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
+      <div className="flex items-center justify-center py-16">
+        <motion.div
+          animate={{ rotate: 360 }}
+          transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+          className="w-12 h-12 border-4 border-red-500 border-t-transparent rounded-full"
+        />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-white">Painel de Uploads</h1>
-        <Button onClick={loadUploads} variant="outline">
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-center justify-between"
+      >
+        <div>
+          <h1 className="text-4xl font-bold text-white mb-2">Painel de Uploads</h1>
+          <p className="text-gray-400">Gerencie todos os seus arquivos de mídia em um só lugar</p>
+        </div>
+        <Button 
+          onClick={loadUploads} 
+          className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl"
+        >
+          <RefreshCw className="w-4 h-4 mr-2" />
           Atualizar
         </Button>
+      </motion.div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatsCard
+          title="Total de Arquivos"
+          value={stats.total}
+          icon={FileImage}
+          color="from-blue-600 to-blue-800"
+          delay={0}
+        />
+        <StatsCard
+          title="Pendentes"
+          value={stats.pending}
+          icon={Clock}
+          color="from-yellow-600 to-orange-600"
+          delay={0.1}
+        />
+        <StatsCard
+          title="Aprovados"
+          value={stats.approved}
+          icon={CheckCircle}
+          color="from-emerald-600 to-green-600"
+          delay={0.2}
+        />
+        <StatsCard
+          title="Rejeitados"
+          value={stats.rejected}
+          icon={XCircle}
+          color="from-red-600 to-pink-600"
+          delay={0.3}
+        />
       </div>
 
-      <Tabs defaultValue="movies" className="space-y-6">
-        <TabsList className="bg-gray-800">
-          <TabsTrigger value="movies" className="flex items-center gap-2">
-            <Film className="w-4 h-4" />
-            Filmes
-          </TabsTrigger>
-          <TabsTrigger value="tvshows" className="flex items-center gap-2">
-            <Tv className="w-4 h-4" />
-            Séries
-          </TabsTrigger>
-          <TabsTrigger value="media" className="flex items-center gap-2">
-            <Upload className="w-4 h-4" />
-            Mídia
-          </TabsTrigger>
-          <TabsTrigger value="pending">
-            Pendentes ({filteredUploads('pending').length})
-          </TabsTrigger>
-          <TabsTrigger value="approved">
-            Aprovados ({filteredUploads('approved').length})
-          </TabsTrigger>
-          <TabsTrigger value="rejected">
-            Rejeitados ({filteredUploads('rejected').length})
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="movies">
+      {/* Upload Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <UploadCard
+          title="Upload de Filmes"
+          description="Adicione novos filmes à plataforma"
+          icon={Film}
+          color="from-purple-600 to-indigo-700"
+          isExpanded={expandedCards.movies}
+          onToggle={() => toggleCard('movies')}
+        >
           <MovieUpload />
-        </TabsContent>
+        </UploadCard>
 
-        <TabsContent value="tvshows">
+        <UploadCard
+          title="Upload de Séries"
+          description="Gerencie séries e episódios"
+          icon={Tv}
+          color="from-emerald-600 to-teal-700"
+          isExpanded={expandedCards.tvshows}
+          onToggle={() => toggleCard('tvshows')}
+        >
           <TVShowUpload />
-        </TabsContent>
+        </UploadCard>
 
-        <TabsContent value="media">
-          <Card className="bg-gray-900 border-gray-800">
-            <CardHeader>
-              <CardTitle className="text-white">Enviar Arquivos de Mídia</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <FileUpload onUploadSuccess={loadUploads} />
-            </CardContent>
-          </Card>
-        </TabsContent>
+        <UploadCard
+          title="Upload de Mídia"
+          description="Envie imagens e outros arquivos"
+          icon={Upload}
+          color="from-orange-600 to-red-700"
+          isExpanded={expandedCards.media}
+          onToggle={() => toggleCard('media')}
+        >
+          <FileUpload onUploadSuccess={loadUploads} />
+        </UploadCard>
+      </div>
 
-        <TabsContent value="pending">
-          <UploadsList uploads={filteredUploads('pending')} />
-        </TabsContent>
+      {/* Filter Tabs */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="flex items-center gap-4 bg-gray-900/50 backdrop-blur-sm rounded-xl p-2 border border-gray-700/50"
+      >
+        {[
+          { key: 'all', label: 'Todos', count: stats.total },
+          { key: 'pending', label: 'Pendentes', count: stats.pending },
+          { key: 'approved', label: 'Aprovados', count: stats.approved },
+          { key: 'rejected', label: 'Rejeitados', count: stats.rejected }
+        ].map((filter) => (
+          <button
+            key={filter.key}
+            onClick={() => setActiveFilter(filter.key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 ${
+              activeFilter === filter.key
+                ? 'bg-red-600 text-white'
+                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+            }`}
+          >
+            <span>{filter.label}</span>
+            <span className={`text-xs px-2 py-1 rounded-full ${
+              activeFilter === filter.key 
+                ? 'bg-white/20' 
+                : 'bg-gray-700'
+            }`}>
+              {filter.count}
+            </span>
+          </button>
+        ))}
+      </motion.div>
 
-        <TabsContent value="approved">
-          <UploadsList uploads={filteredUploads('approved')} />
-        </TabsContent>
-
-        <TabsContent value="rejected">
-          <UploadsList uploads={filteredUploads('rejected')} />
-        </TabsContent>
-      </Tabs>
+      {/* Media Grid */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.5 }}
+      >
+        <MediaGrid
+          uploads={filteredUploads(activeFilter)}
+          onStatusUpdate={handleStatusUpdate}
+          onDelete={handleDelete}
+          updatingStatus={updatingStatus}
+        />
+      </motion.div>
     </div>
   );
 };
