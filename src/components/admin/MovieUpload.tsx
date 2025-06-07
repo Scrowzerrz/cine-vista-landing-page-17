@@ -12,6 +12,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { saveMovie } from '@/services/uploadService'; // Importando saveMovie
+import type { Movie } from '@/types/movie'; // Importando o tipo Movie
 
 const movieSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -114,32 +116,36 @@ const MovieUpload: React.FC = () => {
     }
   };
 
-  const onSubmit = async (data: MovieFormData) => {
+  const onSubmit = async (formData: MovieFormData) => {
     setLoading(true);
     try {
-      // Insert movie
-      const { data: movieData, error: movieError } = await supabase
-        .from('movies')
-        .insert({
-          title: data.title,
-          original_title: data.originalTitle || null,
-          year: data.year,
-          duration: data.duration,
-          rating: data.rating,
-          quality: data.quality,
-          plot: data.plot,
-          poster: data.poster,
-          backdrop: data.backdrop,
-          player_url: data.playerUrl,
-        })
-        .select()
-        .single();
+      // 1. Preparar o payload para saveMovie
+      // A função saveMovie espera um objeto Partial<Movie>
+      // Os campos em MovieFormData são: title, originalTitle, year, duration, rating, quality, plot, poster, backdrop, playerUrl
+      // Os campos em Movie (type) são: title, original_title, year, duration, rating, plot, poster, backdrop, quality, player_url
+      // O mapeamento é direto para a maioria, mas `poster` e `backdrop` no `saveMovie` são mapeados para `poster_url` e `backdrop_url`.
+      // A função `saveMovie` já lida com esse mapeamento interno (poster -> poster_url, backdrop -> backdrop_url).
+      const moviePayload: Partial<Movie> = {
+        title: formData.title,
+        original_title: formData.originalTitle,
+        year: formData.year,
+        duration: formData.duration,
+        rating: formData.rating,
+        quality: formData.quality,
+        plot: formData.plot,
+        poster: formData.poster, // saveMovie irá mapear para poster_url
+        backdrop: formData.backdrop, // saveMovie irá mapear para backdrop_url
+        player_url: formData.playerUrl,
+      };
 
-      if (movieError) throw movieError;
+      const savedMovie = await saveMovie(moviePayload);
 
-      // Insert related data
-      const movieId = movieData.id;
+      if (!savedMovie || !savedMovie.id) {
+        throw new Error("Falha ao salvar o filme ou obter seu ID.");
+      }
+      const movieId = savedMovie.id;
 
+      // O restante da lógica para salvar atores, diretores, etc., continua aqui, usando o movieId
       // Insert actors
       if (actors.some(actor => actor.trim())) {
         const actorNames = actors.filter(actor => actor.trim());
@@ -226,9 +232,13 @@ const MovieUpload: React.FC = () => {
 
     } catch (error) {
       console.error('Error uploading movie:', error);
+      let errorMessage = 'Erro ao adicionar filme. Tente novamente.';
+      if (error instanceof Error) {
+        errorMessage = error.message; // Usar a mensagem da exceção se disponível
+      }
       toast({
-        title: 'Erro',
-        description: 'Erro ao adicionar filme. Tente novamente.',
+        title: 'Erro no Envio',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
