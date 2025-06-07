@@ -42,7 +42,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           console.log('Profile loaded:', data);
         }
       } catch (error) {
-        console.error('Exception in fetchProfile:', error);
+        // Adiciona um log mais específico para erros da query do Supabase
+        console.error('Error querying profile in fetchProfile:', error);
         if (mounted) {
           setProfile(null);
         }
@@ -87,8 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           if (mounted) {
             setSession(null);
             setUser(null);
-            setProfile(null);
-            setLoading(false);
+            // Movido para o bloco finally
           }
           return;
         }
@@ -103,17 +103,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             console.log('Initial session has user, fetching profile...');
             await fetchProfile(session.user.id);
           }
-          
-          setLoading(false);
-          console.log('Initial session processed, loading set to false');
+          // setLoading(false) removido daqui, pois será chamado no finally
         }
       } catch (error) {
         console.error('Exception in getInitialSession:', error);
+        // As redefinições de estado em caso de erro também são movidas para o finally
+        // para garantir que setLoading(false) seja chamado.
+        // No entanto, é importante limpar o estado se houve um erro na obtenção da sessão.
         if (mounted) {
           setSession(null);
           setUser(null);
           setProfile(null);
+        }
+      } finally {
+        if (mounted) {
           setLoading(false);
+          console.log('Initial session processing finished, loading set to false (finally)');
         }
       }
     };
