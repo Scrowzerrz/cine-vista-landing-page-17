@@ -17,16 +17,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // Loading da sessão
+  const [profileLoading, setProfileLoading] = useState(true); // Loading do perfil
+  // Adicionando logs para mudança de estado de loading
+  const _setLoading = (val: boolean) => {
+    console.log('AuthContext: setLoading (session) ->', val);
+    setLoading(val);
+  }
+  const _setProfileLoading = (val: boolean) => {
+    console.log('AuthContext: setProfileLoading ->', val);
+    setProfileLoading(val);
+  }
 
+
+  // useEffect para autenticação (sessão)
   useEffect(() => {
-    console.log('=== AUTH CONTEXT SETUP ===');
+    console.log('=== AUTH EFFECT SETUP ===');
     let mounted = true;
 
     // Função para buscar perfil do usuário
-    const fetchProfile = async (userId: string) => {
+    // Modificada para remover 'mounted' e retornar dados ou null
+    const fetchProfile = async (userId: string): Promise<any | null> => {
+      console.log('Fetching profile for user:', userId);
       try {
-        console.log('Fetching profile for user:', userId);
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -34,25 +47,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           .maybeSingle();
         
         if (error) {
-          console.error('Error fetching profile:', error);
+          console.error('Error fetching profile in fetchProfile:', error);
+          return null; // Retorna null em caso de erro
         }
-        
-        if (mounted) {
-          setProfile(data);
-          console.log('Profile loaded:', data);
-        }
+        console.log('Profile data fetched in fetchProfile:', data);
+        return data; // Retorna os dados do perfil
       } catch (error) {
-        // Adiciona um log mais específico para erros da query do Supabase
-        console.error('Error querying profile in fetchProfile:', error);
-        if (mounted) {
-          setProfile(null);
-        }
+        console.error('Exception in fetchProfile:', error);
+        return null; // Retorna null em caso de exceção
       }
     };
 
     // Configurar listener de mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      (event, session) => { // Removido async pois fetchProfile não é mais awaited aqui
         if (!mounted) return;
 
         console.log('=== AUTH STATE CHANGE ===');
@@ -61,69 +69,57 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.log('User:', session?.user?.email);
         
         setSession(session);
-        setUser(session?.user ?? null);
+        const currentUser = session?.user ?? null;
+        setUser(currentUser);
         
-        if (session?.user) {
-          console.log('User logged in, fetching profile...');
-          await fetchProfile(session.user.id);
-        } else {
-          console.log('User logged out, clearing profile');
-          setProfile(null);
-        }
+        // fetchProfile e setProfile(null) removidos daqui
         
-        // Marcar como não carregando após processar
-        setLoading(false);
-        console.log('Auth state change processed, loading set to false');
+        _setLoading(false); // Indica que o estado de autenticação (sessão) foi processado
+        console.log('Auth state change processed, session loading set to false. User set to:', currentUser?.email);
       }
     );
 
     // Verificar sessão existente
     const getInitialSession = async () => {
+      console.log('Getting initial session...');
+      _setLoading(true); // Inicia o carregamento da sessão
       try {
-        console.log('Getting initial session...');
-        const { data: { session }, error } = await supabase.auth.getSession();
+        const { data: { session: initialSessionData }, error } = await supabase.auth.getSession();
         
         if (error) {
           console.error('Error getting initial session:', error);
+          // setUser e setSession serão null por padrão ou pelo catch
+          // Limpar user/session explicitamente se já existiam e a chamada falha
           if (mounted) {
             setSession(null);
             setUser(null);
-            // Movido para o bloco finally
           }
           return;
         }
 
-        console.log('Initial session result:', !!session, session?.user?.email);
+        console.log('Initial session result:', !!initialSessionData, initialSessionData?.user?.email);
 
         if (mounted) {
-          setSession(session);
-          setUser(session?.user ?? null);
-          
-          if (session?.user) {
-            console.log('Initial session has user, fetching profile...');
-            await fetchProfile(session.user.id);
-          }
-          // setLoading(false) removido daqui, pois será chamado no finally
+          setSession(initialSessionData);
+          setUser(initialSessionData?.user ?? null);
+          // fetchProfile removido daqui
         }
       } catch (error) {
         console.error('Exception in getInitialSession:', error);
-        // As redefinições de estado em caso de erro também são movidas para o finally
-        // para garantir que setLoading(false) seja chamado.
-        // No entanto, é importante limpar o estado se houve um erro na obtenção da sessão.
         if (mounted) {
           setSession(null);
           setUser(null);
-          setProfile(null);
+          // setProfile(null) removido daqui
         }
       } finally {
         if (mounted) {
-          setLoading(false);
-          console.log('Initial session processing finished, loading set to false (finally)');
+          _setLoading(false); // Finaliza o carregamento da sessão
+          console.log('Initial session processing finished, session loading set to false (finally)');
         }
       }
     };
 
-    // Inicializar
+    // Inicializar auth state
     getInitialSession();
 
     // Cleanup
@@ -132,7 +128,59 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, []); // Este useEffect roda apenas uma vez
+
+  // useEffect para buscar perfil (profileEffects)
+  useEffect(() => {
+    let mounted = true; // Variável local para este useEffect
+    console.log('PROFILE EFFECT: Effect triggered. User:', user?.email, 'Mounted:', mounted);
+
+    if (user?.id) { // Verifica se user e user.id existem
+      _setProfileLoading(true); // Começa a carregar o perfil
+      console.log('PROFILE EFFECT: User found, fetching profile for', user.id);
+      fetchProfile(user.id).then(profileData => {
+        if (mounted) {
+          console.log('PROFILE EFFECT: Profile fetched, data:', profileData);
+          setProfile(profileData);
+          _setProfileLoading(false); // Terminou de carregar o perfil
+        } else {
+          console.log('PROFILE EFFECT: Component unmounted before profile could be set.');
+        }
+      });
+    } else {
+      console.log('PROFILE EFFECT: No user or user.id, clearing profile.');
+      setProfile(null);
+      _setProfileLoading(false); // Não há perfil para carregar ou usuário deslogado
+    }
+
+    return () => {
+      console.log('PROFILE EFFECT: Cleanup. User was:', user?.email);
+      mounted = false; // Cleanup para este useEffect
+    };
+  }, [user]); // Depende do objeto user
+
+  // Função fetchProfile movida para fora do useEffect de autenticação para ser acessível pelo profileEffects
+  // Mantida dentro do escopo do AuthProvider para ter acesso ao supabase client
+  const fetchProfile = async (userId: string): Promise<any | null> => {
+    console.log('Fetching profile for user:', userId);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+
+      if (error) {
+        console.error('Error fetching profile in fetchProfile:', error);
+        return null; // Retorna null em caso de erro
+      }
+      console.log('Profile data fetched in fetchProfile:', data);
+      return data; // Retorna os dados do perfil
+    } catch (error) {
+      console.error('Exception in fetchProfile:', error);
+      return null; // Retorna null em caso de exceção
+    }
+  };
 
   const signOut = async () => {
     console.log('Signing out...');
@@ -152,7 +200,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     session,
     user,
     profile,
-    loading,
+    loading: loading || profileLoading, // Combinação dos dois loadings
     signOut,
   };
 
@@ -160,7 +208,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     hasUser: !!user, 
     hasSession: !!session, 
     hasProfile: !!profile, 
-    loading,
+    sessionLoading: loading, // Renomeado para clareza no log
+    profileLoading,
+    combinedLoading: loading || profileLoading,
     userEmail: user?.email
   });
 
