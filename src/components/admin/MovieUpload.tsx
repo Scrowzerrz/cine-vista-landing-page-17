@@ -11,9 +11,11 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { saveMovie } from '@/services/uploadService'; // Importando saveMovie
-import type { Movie } from '@/types/movie'; // Importando o tipo Movie
+// Removido import direto do supabase client, pois saveMovie o utiliza
+import { saveMovie } from '@/services/uploadService';
+import type { Movie } from '@/types/movie';
+import ControlledImageUpload from './ControlledImageUpload';
+import ControlledVideoUpload from './ControlledVideoUpload'; // Importando ControlledVideoUpload
 
 const movieSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -23,9 +25,45 @@ const movieSchema = z.object({
   rating: z.string().min(1, 'Classificação é obrigatória'),
   quality: z.string().min(1, 'Qualidade é obrigatória'),
   plot: z.string().min(10, 'Sinopse deve ter pelo menos 10 caracteres'),
-  poster: z.string().url('URL do poster inválida'),
-  backdrop: z.string().url('URL do backdrop inválida'),
-  playerUrl: z.string().url('URL do player inválida'),
+  poster: z.any()
+    .optional()
+    .nullable()
+    .refine(value => {
+      if (value === null || value === undefined) return true;
+      if (value instanceof File) {
+        return value.type.startsWith('image/');
+      }
+      if (typeof value === 'string') {
+        return value.trim() !== '' && z.string().url().safeParse(value).success;
+      }
+      return false;
+    }, { message: "Poster deve ser um arquivo de imagem válido ou uma URL válida." }),
+  backdrop: z.any()
+    .optional()
+    .nullable()
+    .refine(value => {
+      if (value === null || value === undefined) return true;
+      if (value instanceof File) {
+        return value.type.startsWith('image/');
+      }
+      if (typeof value === 'string') {
+        return value.trim() !== '' && z.string().url().safeParse(value).success;
+      }
+      return false;
+    }, { message: "Backdrop deve ser um arquivo de imagem válido ou uma URL válida." }),
+  playerUrl: z.any()
+    .optional()
+    .nullable()
+    .refine(value => {
+        if (value === null || value === undefined) return true;
+        if (value instanceof File) {
+            return value.type.startsWith('video/');
+        }
+        if (typeof value === 'string') {
+            return value.trim() !== '' && z.string().url().safeParse(value).success;
+        }
+        return false;
+    }, { message: "Player deve ser um arquivo de vídeo válido ou uma URL válida." }),
   actors: z.array(z.string()).optional(),
   directors: z.array(z.string()).optional(),
   producers: z.array(z.string()).optional(),
@@ -51,9 +89,9 @@ const MovieUpload: React.FC = () => {
       rating: '',
       quality: 'HD',
       plot: '',
-      poster: '',
-      backdrop: '',
-      playerUrl: '',
+      poster: null,
+      backdrop: null,
+      playerUrl: null, // Modificado para null
     }
   });
 
@@ -406,9 +444,13 @@ const MovieUpload: React.FC = () => {
                 name="poster"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">URL do Poster *</FormLabel>
+                    <FormLabel className="text-white">Poster *</FormLabel>
                     <FormControl>
-                      <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
+                      <ControlledImageUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="h-48 w-full" // Ajuste a altura/largura conforme necessário
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -420,9 +462,13 @@ const MovieUpload: React.FC = () => {
                 name="backdrop"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel className="text-white">URL do Backdrop *</FormLabel>
+                    <FormLabel className="text-white">Backdrop *</FormLabel>
                     <FormControl>
-                      <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
+                       <ControlledImageUpload
+                        value={field.value}
+                        onChange={field.onChange}
+                        className="h-48 w-full" // Ajuste a altura/largura conforme necessário
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -435,9 +481,13 @@ const MovieUpload: React.FC = () => {
               name="playerUrl"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-white">URL do Player *</FormLabel>
+                  <FormLabel className="text-white">Vídeo do Filme *</FormLabel>
                   <FormControl>
-                    <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
+                    <ControlledVideoUpload
+                      value={field.value}
+                      onChange={field.onChange}
+                      className="h-auto w-full min-h-[100px]" // Ajuste a altura/largura conforme necessário
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
