@@ -34,14 +34,15 @@ const UploadsPanel: React.FC = () => {
   });
 
   const loadUploads = async () => {
+    setLoading(true); // Ensure loading is true at the start
     try {
       const data = await getAllUploads();
       setUploads(data);
     } catch (error) {
       console.error('Error loading uploads:', error);
       toast({
-        title: 'Erro',
-        description: 'Erro ao carregar uploads.',
+        title: 'Erro ao Carregar Uploads',
+        description: `Não foi possível buscar os uploads: ${(error instanceof Error) ? error.message : 'Erro desconhecido'}.`,
         variant: 'destructive'
       });
     } finally {
@@ -65,8 +66,8 @@ const UploadsPanel: React.FC = () => {
     } catch (error) {
       console.error('Error updating status:', error);
       toast({
-        title: 'Erro',
-        description: 'Erro ao atualizar status.',
+        title: 'Erro ao Atualizar Status',
+        description: `Não foi possível atualizar o status: ${(error instanceof Error) ? error.message : 'Erro desconhecido'}.`,
         variant: 'destructive'
       });
     } finally {
@@ -89,8 +90,8 @@ const UploadsPanel: React.FC = () => {
     } catch (error) {
       console.error('Error deleting upload:', error);
       toast({
-        title: 'Erro',
-        description: 'Erro ao deletar arquivo.',
+        title: 'Erro ao Deletar Arquivo',
+        description: `Não foi possível deletar o arquivo: ${(error instanceof Error) ? error.message : 'Erro desconhecido'}.`,
         variant: 'destructive'
       });
     }

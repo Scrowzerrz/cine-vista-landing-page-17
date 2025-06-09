@@ -49,8 +49,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
       setSelectedFile(file);
     } else {
       toast({
-        title: 'Erro',
-        description: 'Por favor, selecione apenas arquivos de imagem.',
+        title: 'Tipo de Arquivo Inválido',
+        description: 'Por favor, selecione apenas arquivos de imagem (PNG, JPG, JPEG, etc.).',
         variant: 'destructive'
       });
     }
@@ -65,8 +65,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   const handleUpload = async () => {
     if (!selectedFile || !uploadType) {
       toast({
-        title: 'Erro',
-        description: 'Por favor, selecione um arquivo e tipo de upload.',
+        title: 'Informação Incompleta',
+        description: 'Por favor, selecione um arquivo e especifique o tipo de upload.',
         variant: 'destructive'
       });
       return;
@@ -85,8 +85,8 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
     } catch (error) {
       console.error('Upload error:', error);
       toast({
-        title: 'Erro',
-        description: 'Erro ao enviar arquivo. Tente novamente.',
+        title: 'Erro no Upload do Arquivo',
+        description: `Falha ao enviar o arquivo: ${(error instanceof Error) ? error.message : 'Erro desconhecido'}.`,
         variant: 'destructive'
       });
     } finally {
@@ -147,9 +147,9 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
               <div>
                 <label htmlFor="file-upload" className="cursor-pointer">
                   <span className="text-red-500 hover:text-red-600 font-medium">
-                    Clique para enviar
+                    {dragActive ? "Solte o arquivo aqui!" : "Clique para enviar"}
                   </span>
-                  <span className="text-gray-500"> ou arraste e solte</span>
+                  {!dragActive && <span className="text-gray-500"> ou arraste e solte</span>}
                 </label>
                 <p className="text-sm text-gray-500 mt-2">
                   PNG, JPG, JPEG até 10MB

@@ -135,80 +135,110 @@ const MovieUpload: React.FC = () => {
         .select()
         .single();
 
-      if (movieError) throw movieError;
+      if (movieError) {
+        console.error('Supabase movie insert error:', movieError);
+        throw new Error(`Falha ao inserir dados principais do filme: ${movieError.message}`);
+      }
 
-      // Insert related data
       const movieId = movieData.id;
 
       // Insert actors
       if (actors.some(actor => actor.trim())) {
         const actorNames = actors.filter(actor => actor.trim());
-        for (const actorName of actorNames) {
-          const { data: actorData, error: actorError } = await supabase
-            .from('actors')
-            .upsert({ name: actorName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
+        try {
+          for (const actorName of actorNames) {
+            const { data: actorData, error: actorError } = await supabase
+              .from('actors')
+              .upsert({ name: actorName.trim() }, { onConflict: 'name' })
+              .select()
+              .single();
 
-          if (!actorError && actorData) {
-            await supabase
-              .from('movie_actors')
-              .insert({ movie_id: movieId, actor_id: actorData.id });
+            if (actorError) throw actorError; // caught by current try-catch
+            if (actorData) {
+              const { error: movieActorError } = await supabase
+                .from('movie_actors')
+                .insert({ movie_id: movieId, actor_id: actorData.id });
+              if (movieActorError) throw movieActorError; // caught by current try-catch
+            }
           }
+        } catch (error) {
+          console.error('Error inserting actors:', error);
+          throw new Error(`Falha ao adicionar atores: ${(error as Error).message}`);
         }
       }
 
       // Insert directors
       if (directors.some(director => director.trim())) {
         const directorNames = directors.filter(director => director.trim());
-        for (const directorName of directorNames) {
-          const { data: directorData, error: directorError } = await supabase
-            .from('directors')
-            .upsert({ name: directorName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
+        try {
+          for (const directorName of directorNames) {
+            const { data: directorData, error: directorError } = await supabase
+              .from('directors')
+              .upsert({ name: directorName.trim() }, { onConflict: 'name' })
+              .select()
+              .single();
 
-          if (!directorError && directorData) {
-            await supabase
-              .from('movie_directors')
-              .insert({ movie_id: movieId, director_id: directorData.id });
+            if (directorError) throw directorError;
+            if (directorData) {
+              const { error: movieDirectorError } = await supabase
+                .from('movie_directors')
+                .insert({ movie_id: movieId, director_id: directorData.id });
+              if (movieDirectorError) throw movieDirectorError;
+            }
           }
+        } catch (error) {
+          console.error('Error inserting directors:', error);
+          throw new Error(`Falha ao adicionar diretores: ${(error as Error).message}`);
         }
       }
 
       // Insert producers
       if (producers.some(producer => producer.trim())) {
         const producerNames = producers.filter(producer => producer.trim());
-        for (const producerName of producerNames) {
-          const { data: producerData, error: producerError } = await supabase
-            .from('producers')
-            .upsert({ name: producerName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
+        try {
+          for (const producerName of producerNames) {
+            const { data: producerData, error: producerError } = await supabase
+              .from('producers')
+              .upsert({ name: producerName.trim() }, { onConflict: 'name' })
+              .select()
+              .single();
 
-          if (!producerError && producerData) {
-            await supabase
-              .from('movie_producers')
-              .insert({ movie_id: movieId, producer_id: producerData.id });
+            if (producerError) throw producerError;
+            if (producerData) {
+              const { error: movieProducerError } = await supabase
+                .from('movie_producers')
+                .insert({ movie_id: movieId, producer_id: producerData.id });
+              if (movieProducerError) throw movieProducerError;
+            }
           }
+        } catch (error) {
+          console.error('Error inserting producers:', error);
+          throw new Error(`Falha ao adicionar produtores: ${(error as Error).message}`);
         }
       }
 
       // Insert categories
       if (categories.some(category => category.trim())) {
         const categoryNames = categories.filter(category => category.trim());
-        for (const categoryName of categoryNames) {
-          const { data: categoryData, error: categoryError } = await supabase
-            .from('categories')
-            .upsert({ name: categoryName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
+        try {
+          for (const categoryName of categoryNames) {
+            const { data: categoryData, error: categoryError } = await supabase
+              .from('categories')
+              .upsert({ name: categoryName.trim() }, { onConflict: 'name' })
+              .select()
+              .single();
 
-          if (!categoryError && categoryData) {
-            await supabase
-              .from('movie_categories')
-              .insert({ movie_id: movieId, category_id: categoryData.id });
+            if (categoryError) throw categoryError;
+            if (categoryData) {
+              const { error: movieCategoryError } = await supabase
+                .from('movie_categories')
+                .insert({ movie_id: movieId, category_id: categoryData.id });
+              if (movieCategoryError) throw movieCategoryError;
+            }
           }
+        } catch (error) {
+          console.error('Error inserting categories:', error);
+          throw new Error(`Falha ao adicionar categorias: ${(error as Error).message}`);
         }
       }
 
@@ -217,7 +247,7 @@ const MovieUpload: React.FC = () => {
         description: 'Filme adicionado com sucesso!',
       });
 
-      // Reset form
+      // Reset form only on full success
       form.reset();
       setActors(['']);
       setDirectors(['']);
@@ -226,9 +256,10 @@ const MovieUpload: React.FC = () => {
 
     } catch (error) {
       console.error('Error uploading movie:', error);
+      const errorMessage = (error instanceof Error) ? error.message : 'Erro desconhecido ao adicionar filme.';
       toast({
-        title: 'Erro',
-        description: 'Erro ao adicionar filme. Tente novamente.',
+        title: 'Erro ao Salvar Filme',
+        description: `Falha na operação: ${errorMessage}`,
         variant: 'destructive',
       });
     } finally {

@@ -13,6 +13,19 @@ import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
+const episodeSchema = z.object({
+  episodeNumber: z.number(),
+  title: z.string().min(1, "Episode title is required"),
+  playerUrl: z.string().url("Invalid player URL"),
+  duration: z.string().min(1, "Episode duration is required"),
+});
+
+const seasonSchema = z.object({
+  seasonNumber: z.number(),
+  numberOfEpisodes: z.number().min(0),
+  episodes: z.array(episodeSchema),
+});
+
 const tvshowSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   originalTitle: z.string().optional(),
@@ -23,13 +36,13 @@ const tvshowSchema = z.object({
   poster: z.string().url('URL do poster inválida'),
   backdrop: z.string().url('URL do backdrop inválida'),
   totalSeasons: z.number().min(1, 'Deve ter pelo menos 1 temporada'),
-  totalEpisodes: z.number().min(1, 'Deve ter pelo menos 1 episódio'),
   network: z.string().optional(),
   creator: z.string().optional(),
   actors: z.array(z.string()).optional(),
   directors: z.array(z.string()).optional(),
   producers: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),
+  seasons: z.array(seasonSchema).optional(), // Optional for now, will be populated from state
 });
 
 type TVShowFormData = z.infer<typeof tvshowSchema>;
@@ -40,6 +53,7 @@ const TVShowUpload: React.FC = () => {
   const [directors, setDirectors] = useState<string[]>(['']);
   const [producers, setProducers] = useState<string[]>(['']);
   const [categories, setCategories] = useState<string[]>(['']);
+  const [seasons, setSeasons] = useState<Array<{ seasonNumber: number; numberOfEpisodes: number; episodes: Array<{ episodeNumber: number; title: string; playerUrl: string; duration: string }> }>>([{ seasonNumber: 1, numberOfEpisodes: 0, episodes: [] }]);
 
   const form = useForm<TVShowFormData>({
     resolver: zodResolver(tvshowSchema),
@@ -53,7 +67,6 @@ const TVShowUpload: React.FC = () => {
       poster: '',
       backdrop: '',
       totalSeasons: 1,
-      totalEpisodes: 1,
       network: '',
       creator: '',
     }
@@ -118,123 +131,263 @@ const TVShowUpload: React.FC = () => {
     }
   };
 
+  const handleTotalSeasonsChange = (newTotalSeasons: number) => {
+    form.setValue('totalSeasons', newTotalSeasons);
+    setSeasons(currentSeasons => {
+      const currentLength = currentSeasons.length;
+      if (newTotalSeasons > currentLength) {
+        const newSeasonsToAdd = Array.from({ length: newTotalSeasons - currentLength }, (_, i) => ({
+          seasonNumber: currentLength + i + 1,
+          numberOfEpisodes: 0,
+          episodes: [],
+        }));
+        return [...currentSeasons, ...newSeasonsToAdd];
+      } else if (newTotalSeasons < currentLength) {
+        return currentSeasons.slice(0, newTotalSeasons);
+      }
+      return currentSeasons;
+    });
+  };
+
+  const handleNumberOfEpisodesChange = (seasonIndex: number, newNumberOfEpisodes: number) => {
+    setSeasons(currentSeasons => {
+      const updatedSeasons = [...currentSeasons];
+      const season = updatedSeasons[seasonIndex];
+      if (season) {
+        season.numberOfEpisodes = newNumberOfEpisodes;
+        const currentEpisodeCount = season.episodes.length;
+        if (newNumberOfEpisodes > currentEpisodeCount) {
+          const episodesToAdd = Array.from({ length: newNumberOfEpisodes - currentEpisodeCount }, (_, i) => ({
+            episodeNumber: currentEpisodeCount + i + 1,
+            title: '',
+            playerUrl: '',
+            duration: '',
+          }));
+          season.episodes = [...season.episodes, ...episodesToAdd];
+        } else if (newNumberOfEpisodes < currentEpisodeCount) {
+          season.episodes = season.episodes.slice(0, newNumberOfEpisodes);
+        }
+      }
+      return updatedSeasons;
+    });
+  };
+
+  const handleEpisodeDetailChange = (seasonIndex: number, episodeIndex: number, fieldName: string, value: string) => {
+    setSeasons(currentSeasons => {
+      const updatedSeasons = [...currentSeasons];
+      const season = updatedSeasons[seasonIndex];
+      if (season && season.episodes[episodeIndex]) {
+        (season.episodes[episodeIndex] as any)[fieldName] = value;
+      }
+      return updatedSeasons;
+    });
+  };
+
   const onSubmit = async (data: TVShowFormData) => {
     setLoading(true);
+
+    // Prepare the full data object including seasons from state
+    const fullTVShowData = {
+      ...data,
+      actors: actors.filter(a => a.trim()),
+      directors: directors.filter(d => d.trim()),
+      producers: producers.filter(p => p.trim()),
+      categories: categories.filter(c => c.trim()),
+      seasons: seasons.map(s => ({
+        seasonNumber: s.seasonNumber,
+        numberOfEpisodes: s.numberOfEpisodes, // This is for UI logic, not directly stored in `season` table if schema is just id, tvshow_id, season_number
+        episodes: s.episodes.map(e => ({
+          episodeNumber: e.episodeNumber,
+          title: e.title,
+          playerUrl: e.playerUrl,
+          duration: e.duration,
+        }))
+      })),
+    };
+
+    // Validate the full data structure including seasons and episodes
     try {
-      // Insert tvshow
+      tvshowSchema.parse(fullTVShowData);
+    } catch (validationError) {
+      if (validationError instanceof z.ZodError) {
+        console.error("Validation errors:", validationError.errors);
+        // Construct a user-friendly error message
+        const errorMessages = validationError.errors.map(err => {
+          const path = err.path.join('.');
+          // Customize messages for nested season/episode fields
+          if (path.startsWith('seasons')) {
+            const [, seasonIndex, field, episodeIndex, episodeField] = err.path;
+            if (episodeField) { // Error within an episode
+              return `Temporada ${Number(seasonIndex) + 1}, Episódio ${Number(episodeIndex) + 1}, Campo '${episodeField}': ${err.message}`;
+            } else { // Error within a season (e.g. numberOfEpisodes, or episode array itself)
+              return `Temporada ${Number(seasonIndex) + 1}, Campo '${field}': ${err.message}`;
+            }
+          }
+          return `${path}: ${err.message}`;
+        });
+        toast({
+          title: "Erro de Validação",
+          description: "Por favor, corrija os seguintes erros: " + errorMessages.join('; '),
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Erro de Validação",
+          description: "Ocorreu um erro inesperado durante a validação.",
+          variant: "destructive",
+        });
+      }
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // Insert tvshow (main details)
       const { data: tvshowData, error: tvshowError } = await supabase
         .from('tvshows')
         .insert({
-          title: data.title,
-          original_title: data.originalTitle || null,
-          year: data.year,
-          rating: data.rating,
-          quality: data.quality,
-          plot: data.plot,
-          poster: data.poster,
-          backdrop: data.backdrop,
-          total_seasons: data.totalSeasons,
-          total_episodes: data.totalEpisodes,
-          network: data.network || null,
-          creator: data.creator || null,
+          title: fullTVShowData.title,
+          original_title: fullTVShowData.originalTitle || null,
+          year: fullTVShowData.year,
+          rating: fullTVShowData.rating,
+          quality: fullTVShowData.quality,
+          plot: fullTVShowData.plot,
+          poster: fullTVShowData.poster,
+          backdrop: fullTVShowData.backdrop,
+          total_seasons: fullTVShowData.totalSeasons, // This comes from the form
+          network: fullTVShowData.network || null,
+          creator: fullTVShowData.creator || null,
         })
         .select()
         .single();
 
       if (tvshowError) throw tvshowError;
-
-      // Insert related data
       const tvshowId = tvshowData.id;
 
       // Insert actors
-      if (actors.some(actor => actor.trim())) {
-        const actorNames = actors.filter(actor => actor.trim());
-        for (const actorName of actorNames) {
+      if (fullTVShowData.actors && fullTVShowData.actors.length > 0) {
+        for (const actorName of fullTVShowData.actors) {
           const { data: actorData, error: actorError } = await supabase
             .from('actors')
             .upsert({ name: actorName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!actorError && actorData) {
-            await supabase
-              .from('tvshow_actors')
-              .insert({ tvshow_id: tvshowId, actor_id: actorData.id });
+            .select().single();
+          if (actorError) { console.error('Actor insert error:', actorError); throw actorError; }
+          if (actorData) {
+            const { error: tvshowActorError } = await supabase.from('tvshow_actors').insert({ tvshow_id: tvshowId, actor_id: actorData.id });
+            if (tvshowActorError) { console.error('TVShow_Actor insert error:', tvshowActorError); throw tvshowActorError; }
           }
         }
       }
 
       // Insert directors
-      if (directors.some(director => director.trim())) {
-        const directorNames = directors.filter(director => director.trim());
-        for (const directorName of directorNames) {
+      if (fullTVShowData.directors && fullTVShowData.directors.length > 0) {
+        for (const directorName of fullTVShowData.directors) {
           const { data: directorData, error: directorError } = await supabase
             .from('directors')
             .upsert({ name: directorName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!directorError && directorData) {
-            await supabase
-              .from('tvshow_directors')
-              .insert({ tvshow_id: tvshowId, director_id: directorData.id });
+            .select().single();
+          if (directorError) { console.error('Director insert error:', directorError); throw directorError; }
+          if (directorData) {
+            const { error: tvshowDirectorError } = await supabase.from('tvshow_directors').insert({ tvshow_id: tvshowId, director_id: directorData.id });
+            if (tvshowDirectorError) { console.error('TVShow_Director insert error:', tvshowDirectorError); throw tvshowDirectorError; }
           }
         }
       }
 
       // Insert producers
-      if (producers.some(producer => producer.trim())) {
-        const producerNames = producers.filter(producer => producer.trim());
-        for (const producerName of producerNames) {
+      if (fullTVShowData.producers && fullTVShowData.producers.length > 0) {
+        for (const producerName of fullTVShowData.producers) {
           const { data: producerData, error: producerError } = await supabase
             .from('producers')
             .upsert({ name: producerName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!producerError && producerData) {
-            await supabase
-              .from('tvshow_producers')
-              .insert({ tvshow_id: tvshowId, producer_id: producerData.id });
+            .select().single();
+          if (producerError) { console.error('Producer insert error:', producerError); throw producerError; }
+          if (producerData) {
+            const { error: tvshowProducerError } = await supabase.from('tvshow_producers').insert({ tvshow_id: tvshowId, producer_id: producerData.id });
+            if (tvshowProducerError) { console.error('TVShow_Producer insert error:', tvshowProducerError); throw tvshowProducerError; }
           }
         }
       }
 
       // Insert categories
-      if (categories.some(category => category.trim())) {
-        const categoryNames = categories.filter(category => category.trim());
-        for (const categoryName of categoryNames) {
+      if (fullTVShowData.categories && fullTVShowData.categories.length > 0) {
+        for (const categoryName of fullTVShowData.categories) {
           const { data: categoryData, error: categoryError } = await supabase
             .from('categories')
             .upsert({ name: categoryName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!categoryError && categoryData) {
-            await supabase
-              .from('tvshow_categories')
-              .insert({ tvshow_id: tvshowId, category_id: categoryData.id });
+            .select().single();
+          if (categoryError) { console.error('Category insert error:', categoryError); throw categoryError; }
+          if (categoryData) {
+            const { error: tvshowCategoryError } = await supabase.from('tvshow_categories').insert({ tvshow_id: tvshowId, category_id: categoryData.id });
+            if (tvshowCategoryError) { console.error('TVShow_Category insert error:', tvshowCategoryError); throw tvshowCategoryError; }
           }
+        }
+      }
+
+      // Insert seasons and episodes
+      for (const season of fullTVShowData.seasons) {
+        // Validate each season (already done by tvshowSchema.parse, but good for clarity)
+        // seasonSchema.parse(season);
+
+        const { data: seasonData, error: seasonError } = await supabase
+          .from('seasons')
+          .insert({
+            tvshow_id: tvshowId,
+            season_number: season.seasonNumber,
+            // numberOfEpisodes is not part of the 'seasons' table schema based on the prompt
+          })
+          .select()
+          .single();
+
+        if (seasonError) { console.error('Season insert error:', seasonError); throw seasonError; }
+        const seasonId = seasonData.id;
+
+        for (const episode of season.episodes) {
+          // Validate each episode (already done by tvshowSchema.parse)
+          // episodeSchema.parse(episode);
+
+          const { error: episodeError } = await supabase
+            .from('episodes')
+            .insert({
+              season_id: seasonId,
+              episode_number: episode.episodeNumber,
+              title: episode.title,
+              player_url: episode.playerUrl,
+              duration: episode.duration,
+            });
+          if (episodeError) { console.error('Episode insert error:', episodeError); throw episodeError; }
         }
       }
 
       toast({
         title: 'Sucesso!',
-        description: 'Série adicionada com sucesso!',
+        description: 'Série e todos os seus dados foram adicionados com sucesso!',
       });
 
-      // Reset form
-      form.reset();
+      // Reset form and state
+      form.reset(); // Resets react-hook-form fields
       setActors(['']);
       setDirectors(['']);
       setProducers(['']);
       setCategories(['']);
+      // Reset seasons state to initial
+      setSeasons([{ seasonNumber: 1, numberOfEpisodes: 0, episodes: [] }]);
+      // totalSeasons is part of form.reset(), but ensure it's explicitly set if needed
+      form.setValue('totalSeasons', 1);
 
     } catch (error) {
       console.error('Error uploading tvshow:', error);
+      let description = 'Erro ao adicionar série. Tente novamente.';
+      // Attempt to get a more specific error message from Supabase or Zod
+      if (error instanceof Error) {
+        description = error.message;
+      } else if (typeof error === 'object' && error !== null && 'message' in error) {
+        description = String((error as {message: string}).message);
+      }
+
       toast({
-        title: 'Erro',
-        description: 'Erro ao adicionar série. Tente novamente.',
+        title: 'Erro no Envio',
+        description: description,
         variant: 'destructive',
       });
     } finally {
@@ -375,31 +528,18 @@ const TVShowUpload: React.FC = () => {
                     <FormLabel className="text-white">Total de Temporadas *</FormLabel>
                     <FormControl>
                       <Input 
-                        {...field} 
-                        type="number" 
+                        {...field}
+                        type="number"
                         min="1"
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                        className="bg-gray-800 border-gray-600 text-white" 
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="totalEpisodes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Total de Episódios *</FormLabel>
-                    <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        min="1"
-                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                        className="bg-gray-800 border-gray-600 text-white" 
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value);
+                          if (!isNaN(value) && value > 0) {
+                            handleTotalSeasonsChange(value);
+                          } else {
+                            handleTotalSeasonsChange(1); // Reset to 1 if input is invalid
+                          }
+                        }}
+                        className="bg-gray-800 border-gray-600 text-white"
                       />
                     </FormControl>
                     <FormMessage />
@@ -488,6 +628,69 @@ const TVShowUpload: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {renderFieldArray('Produtores', 'producers', producers)}
               {renderFieldArray('Categorias', 'categories', categories)}
+            </div>
+
+            {/* Seasons and Episodes */}
+            <div className="space-y-6">
+              {seasons.map((season, seasonIndex) => (
+                <Card key={season.seasonNumber} className="bg-gray-800 border-gray-700">
+                  <CardHeader>
+                    <CardTitle className="text-xl text-white">Temporada {season.seasonNumber}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div>
+                      <Label htmlFor={`season-${season.seasonNumber}-episodes`} className="text-white">Número de Episódios</Label>
+                      <Input
+                        id={`season-${season.seasonNumber}-episodes`}
+                        type="number"
+                        min="0"
+                        value={season.numberOfEpisodes}
+                        onChange={(e) => handleNumberOfEpisodesChange(seasonIndex, parseInt(e.target.value) || 0)}
+                        className="bg-gray-700 border-gray-600 text-white mt-1"
+                      />
+                    </div>
+
+                    {season.episodes.map((episode, episodeIndex) => (
+                      <Card key={episodeIndex} className="bg-gray-750 border-gray-650 p-4">
+                        <h4 className="text-lg font-semibold text-white mb-3">Episódio {episode.episodeNumber}</h4>
+                        <div className="space-y-3">
+                          <div>
+                            <Label htmlFor={`episode-${season.seasonNumber}-${episode.episodeNumber}-title`} className="text-white">Título do Episódio</Label>
+                            <Input
+                              id={`episode-${season.seasonNumber}-${episode.episodeNumber}-title`}
+                              value={episode.title}
+                              onChange={(e) => handleEpisodeDetailChange(seasonIndex, episodeIndex, 'title', e.target.value)}
+                              className="bg-gray-700 border-gray-600 text-white mt-1"
+                              placeholder="Título do Episódio"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`episode-${season.seasonNumber}-${episode.episodeNumber}-playerUrl`} className="text-white">URL do Player</Label>
+                            <Input
+                              id={`episode-${season.seasonNumber}-${episode.episodeNumber}-playerUrl`}
+                              type="url"
+                              value={episode.playerUrl}
+                              onChange={(e) => handleEpisodeDetailChange(seasonIndex, episodeIndex, 'playerUrl', e.target.value)}
+                              className="bg-gray-700 border-gray-600 text-white mt-1"
+                              placeholder="https://example.com/player"
+                            />
+                          </div>
+                          <div>
+                            <Label htmlFor={`episode-${season.seasonNumber}-${episode.episodeNumber}-duration`} className="text-white">Duração</Label>
+                            <Input
+                              id={`episode-${season.seasonNumber}-${episode.episodeNumber}-duration`}
+                              value={episode.duration}
+                              onChange={(e) => handleEpisodeDetailChange(seasonIndex, episodeIndex, 'duration', e.target.value)}
+                              className="bg-gray-700 border-gray-600 text-white mt-1"
+                              placeholder="ex: 22 min"
+                            />
+                          </div>
+                        </div>
+                      </Card>
+                    ))}
+                  </CardContent>
+                </Card>
+              ))}
             </div>
 
             <Button
