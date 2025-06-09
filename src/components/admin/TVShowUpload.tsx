@@ -26,7 +26,7 @@ const tvshowSchema = z.object({
   creator: z.string().optional(),
 });
 
-type TVShowFormData = z.infer<typeof tvshowSchema>;
+export type TVShowFormData = z.infer<typeof tvshowSchema>;
 
 const TVShowUpload: React.FC = () => {
   const [actors, setActors] = useState<string[]>(['']);

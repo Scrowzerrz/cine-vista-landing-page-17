@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
@@ -6,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const location = useLocation();
 
   const toggleMenu = () => {
@@ -55,9 +56,6 @@ const Navbar: React.FC = () => {
                   Admin
                 </Link>
               )}
-              <button onClick={logout} className="hover:text-gray-300 focus:outline-none">
-                Logout
-              </button>
             </>
           ) : (
             <>
@@ -106,9 +104,6 @@ const Navbar: React.FC = () => {
                         Admin
                       </Link>
                     )}
-                    <button onClick={logout} className="hover:text-gray-300 focus:outline-none">
-                      Logout
-                    </button>
                   </>
                 ) : (
                   <>

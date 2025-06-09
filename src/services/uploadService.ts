@@ -166,14 +166,14 @@ export async function saveTvShow(tvShowFormData: Partial<TVShow> & {
   totalEpisodes?: number;
 }): Promise<TVShow> {
   let posterUrlFromUpload: string | null = null;
-  if (tvShowFormData.poster && tvShowFormData.poster instanceof File) {
+  if (tvShowFormData.poster && typeof tvShowFormData.poster === 'object' && tvShowFormData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(tvShowFormData.poster, 'tvshow_poster');
   } else if (typeof tvShowFormData.poster === 'string') {
     posterUrlFromUpload = tvShowFormData.poster;
   }
 
   let backdropUrlFromUpload: string | null = null;
-  if (tvShowFormData.backdrop && tvShowFormData.backdrop instanceof File) {
+  if (tvShowFormData.backdrop && typeof tvShowFormData.backdrop === 'object' && tvShowFormData.backdrop instanceof File) {
     backdropUrlFromUpload = await uploadImageAndGetUrl(tvShowFormData.backdrop, 'tvshow_backdrop');
   } else if (typeof tvShowFormData.backdrop === 'string') {
     backdropUrlFromUpload = tvShowFormData.backdrop;
@@ -245,14 +245,14 @@ export async function saveEpisode(
 ): Promise<Episode> {
 
   let posterUrlFromUpload: string | null = null;
-  if (episodeFormData.poster && episodeFormData.poster instanceof File) {
+  if (episodeFormData.poster && typeof episodeFormData.poster === 'object' && episodeFormData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(episodeFormData.poster, 'episode_poster');
   } else if (typeof episodeFormData.poster === 'string') {
     posterUrlFromUpload = episodeFormData.poster;
   }
 
   let videoUrlFromUpload: string | null = null;
-  if (episodeFormData.player_url && episodeFormData.player_url instanceof File) {
+  if (episodeFormData.player_url && typeof episodeFormData.player_url === 'object' && episodeFormData.player_url instanceof File) {
     videoUrlFromUpload = await uploadVideoAndGetUrl(episodeFormData.player_url, 'episode_video');
   } else if (typeof episodeFormData.player_url === 'string') {
     videoUrlFromUpload = episodeFormData.player_url;
@@ -290,21 +290,21 @@ export async function saveMovie(
 ): Promise<Movie> {
 
   let posterUrlFromUpload: string | null = null;
-  if (movieData.poster && movieData.poster instanceof File) {
+  if (movieData.poster && typeof movieData.poster === 'object' && movieData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(movieData.poster, 'movie_poster');
   } else if (typeof movieData.poster === 'string') {
     posterUrlFromUpload = movieData.poster;
   }
 
   let backdropUrlFromUpload: string | null = null;
-  if (movieData.backdrop && movieData.backdrop instanceof File) {
+  if (movieData.backdrop && typeof movieData.backdrop === 'object' && movieData.backdrop instanceof File) {
     backdropUrlFromUpload = await uploadImageAndGetUrl(movieData.backdrop, 'movie_backdrop');
   } else if (typeof movieData.backdrop === 'string') {
     backdropUrlFromUpload = movieData.backdrop;
   }
 
   let videoUrlFromUpload: string | null = null;
-  if (movieData.player_url && movieData.player_url instanceof File) {
+  if (movieData.player_url && typeof movieData.player_url === 'object' && movieData.player_url instanceof File) {
     videoUrlFromUpload = await uploadVideoAndGetUrl(movieData.player_url, 'movie_video');
   } else if (typeof movieData.player_url === 'string') {
     videoUrlFromUpload = movieData.player_url;

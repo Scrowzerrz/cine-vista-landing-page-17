@@ -4,23 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { UseFormReturn } from 'react-hook-form';
 import ControlledImageUpload from '../ControlledImageUpload';
 import ControlledVideoUpload from '../ControlledVideoUpload';
-
-interface MovieFormData {
-  title: string;
-  originalTitle?: string;
-  year: string;
-  duration: string;
-  rating: string;
-  quality: string;
-  plot: string;
-  poster: File | string | null;
-  backdrop: File | string | null;
-  playerUrl: File | string | null;
-  actors?: string[];
-  directors?: string[];
-  producers?: string[];
-  categories?: string[];
-}
+import type { MovieFormData } from '../MovieUpload';
 
 interface MovieMediaFieldsProps {
   form: UseFormReturn<MovieFormData>;

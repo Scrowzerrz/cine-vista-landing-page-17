@@ -4,21 +4,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
-
-interface TVShowFormData {
-  title: string;
-  originalTitle?: string;
-  year: string;
-  rating: string;
-  quality: string;
-  plot: string;
-  poster: string;
-  backdrop: string;
-  totalSeasons: number;
-  totalEpisodes: number;
-  network?: string;
-  creator?: string;
-}
+import type { TVShowFormData } from '../TVShowUpload';
 
 interface TVShowBasicFieldsProps {
   form: UseFormReturn<TVShowFormData>;
@@ -100,46 +86,6 @@ const TVShowBasicFields: React.FC<TVShowBasicFieldsProps> = ({ form }) => {
 
         <FormField
           control={form.control}
-          name="totalSeasons"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Total de Temporadas *</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  min="1"
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                  className="bg-gray-800 border-gray-600 text-white"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="totalEpisodes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">Total de Episódios *</FormLabel>
-              <FormControl>
-                <Input
-                  {...field}
-                  type="number"
-                  min="1"
-                  onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
-                  className="bg-gray-800 border-gray-600 text-white"
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
           name="network"
           render={({ field }) => (
             <FormItem>
@@ -165,6 +111,62 @@ const TVShowBasicFields: React.FC<TVShowBasicFieldsProps> = ({ form }) => {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="totalSeasons"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Total de Temporadas *</FormLabel>
+              <FormControl>
+                <Input {...field} type="number" min="1" onChange={e => field.onChange(parseInt(e.target.value))} className="bg-gray-800 border-gray-600 text-white" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="totalEpisodes"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">Total de Episódios *</FormLabel>
+              <FormControl>
+                <Input {...field} type="number" min="1" onChange={e => field.onChange(parseInt(e.target.value))} className="bg-gray-800 border-gray-600 text-white" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="poster"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">URL do Poster *</FormLabel>
+              <FormControl>
+                <Input {...field} type="url" placeholder="https://..." className="bg-gray-800 border-gray-600 text-white" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="backdrop"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-white">URL do Backdrop *</FormLabel>
+              <FormControl>
+                <Input {...field} type="url" placeholder="https://..." className="bg-gray-800 border-gray-600 text-white" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
       </div>
 
       <FormField
@@ -180,36 +182,6 @@ const TVShowBasicFields: React.FC<TVShowBasicFieldsProps> = ({ form }) => {
           </FormItem>
         )}
       />
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <FormField
-          control={form.control}
-          name="poster"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">URL do Poster *</FormLabel>
-              <FormControl>
-                <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="backdrop"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel className="text-white">URL do Backdrop *</FormLabel>
-              <FormControl>
-                <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-      </div>
     </>
   );
 };

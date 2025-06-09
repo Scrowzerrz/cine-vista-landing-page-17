@@ -59,13 +59,9 @@ const movieSchema = z.object({
         }
         return false;
     }, { message: "Player deve ser um arquivo de vídeo válido ou uma URL válida." }),
-  actors: z.array(z.string()).optional(),
-  directors: z.array(z.string()).optional(),
-  producers: z.array(z.string()).optional(),
-  categories: z.array(z.string()).optional(),
 });
 
-type MovieFormData = z.infer<typeof movieSchema>;
+export type MovieFormData = z.infer<typeof movieSchema>;
 
 const MovieUpload: React.FC = () => {
   const [actors, setActors] = useState<string[]>(['']);

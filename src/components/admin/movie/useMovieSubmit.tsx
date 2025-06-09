@@ -4,19 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { saveMovie } from '@/services/uploadService';
 import type { Movie } from '@/types/movie';
-
-interface MovieFormData {
-  title: string;
-  originalTitle?: string;
-  year: string;
-  duration: string;
-  rating: string;
-  quality: string;
-  plot: string;
-  poster: File | string | null;
-  backdrop: File | string | null;
-  playerUrl: File | string | null;
-}
+import type { MovieFormData } from '../MovieUpload';
 
 export const useMovieSubmit = () => {
   const [loading, setLoading] = useState(false);
@@ -38,9 +26,9 @@ export const useMovieSubmit = () => {
         rating: formData.rating,
         quality: formData.quality,
         plot: formData.plot,
-        poster: formData.poster,
-        backdrop: formData.backdrop,
-        player_url: formData.playerUrl,
+        poster: formData.poster as File | string | null,
+        backdrop: formData.backdrop as File | string | null,
+        player_url: formData.playerUrl as File | string | null,
       };
 
       const savedMovie = await saveMovie(moviePayload);
