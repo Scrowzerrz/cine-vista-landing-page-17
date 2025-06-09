@@ -151,7 +151,17 @@ export async function uploadVideoAndGetUrl(file: File, uploadType: 'movie_video'
 }
 
 // --- Funções de TV Show ---
-export async function saveTvShow(tvShowFormData: Partial<TVShow> & { poster?: File | string; backdrop?: File | string; year?: string; plot?: string }): Promise<TVShow> {
+export async function saveTvShow(tvShowFormData: Partial<TVShow> & { 
+  poster?: File | string; 
+  backdrop?: File | string; 
+  year?: string; 
+  plot?: string;
+  originalTitle?: string;
+  rating?: string;
+  quality?: string;
+  network?: string;
+  creator?: string;
+}): Promise<TVShow> {
   let posterUrlFromUpload: string | null = null;
   if (tvShowFormData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(tvShowFormData.poster, 'tvshow_poster');
@@ -169,97 +179,90 @@ export async function saveTvShow(tvShowFormData: Partial<TVShow> & { poster?: Fi
   const dataToInsert = {
     title: tvShowFormData.title,
     original_title: tvShowFormData.originalTitle || null,
-    release_year: tvShowFormData.year ? parseInt(tvShowFormData.year, 10) : null,
+    year: tvShowFormData.year || null,
     rating: tvShowFormData.rating || null,
     quality: tvShowFormData.quality || null,
-    synopsis: tvShowFormData.plot,
-    poster_url: posterUrlFromUpload,
-    backdrop_url: backdropUrlFromUpload,
+    plot: tvShowFormData.plot || null,
+    poster: posterUrlFromUpload,
+    backdrop: backdropUrlFromUpload,
     network: tvShowFormData.network || null,
     creator: tvShowFormData.creator || null,
+    total_seasons: tvShowFormData.total_seasons || 1,
+    total_episodes: tvShowFormData.total_episodes || 1,
   };
 
   Object.keys(dataToInsert).forEach(keyStr => {
     const key = keyStr as keyof typeof dataToInsert;
     if (dataToInsert[key] === undefined) delete dataToInsert[key];
-    if (dataToInsert[key] === '') {
-      const nullableFields = ['original_title', 'rating', 'quality', 'synopsis', 'poster_url', 'backdrop_url', 'network', 'creator'];
-      if (nullableFields.includes(key)) (dataToInsert as any)[key] = null;
-    }
   });
-  if (Number.isNaN(dataToInsert.release_year)) dataToInsert.release_year = null;
 
   const { data, error } = await supabase.from('tvshows').insert(dataToInsert as any).select().single();
-  if (error) { console.error('Error saving TV show:', error.message, error.details); throw error; }
+  if (error) { 
+    console.error('Error saving TV show:', error.message, error.details); 
+    throw error; 
+  }
   return data as TVShow;
 }
 
-export async function saveSeason(seasonFormData: any, tvShowId: string): Promise<Season> {
+export async function saveSeason(seasonFormData: {
+  season_number: number;
+  year: string;
+}, tvShowId: string): Promise<Season> {
   const dataToInsert = {
-    tv_show_id: tvShowId,
+    tvshow_id: tvShowId,
     season_number: seasonFormData.season_number,
-    title: seasonFormData.title || null,
+    year: seasonFormData.year,
   };
-  Object.keys(dataToInsert).forEach(key => dataToInsert[key] === undefined && delete dataToInsert[key]);
+
   const { data, error } = await supabase.from('seasons').insert(dataToInsert).select().single();
-  if (error) { console.error('Error saving season:', error.message, error.details); throw error; }
+  if (error) { 
+    console.error('Error saving season:', error.message, error.details); 
+    throw error; 
+  }
   return data as Season;
 }
 
 export async function saveEpisode(
-  episodeFormData: Partial<Episode> & {
-    poster_url?: File | string;
-    backdrop_url?: File | string;
-    video_url?: File | string; // Modificado para aceitar File ou string
+  episodeFormData: {
+    episode_number: number;
+    title: string;
+    overview: string;
+    runtime: string;
+    poster?: File | string;
+    player_url?: File | string;
   },
   seasonId: string
 ): Promise<Episode> {
 
   let posterUrlFromUpload: string | null = null;
-  if (episodeFormData.poster_url instanceof File) {
-    posterUrlFromUpload = await uploadImageAndGetUrl(episodeFormData.poster_url, 'episode_poster');
-  } else if (typeof episodeFormData.poster_url === 'string') {
-    posterUrlFromUpload = episodeFormData.poster_url;
-  }
-
-  let backdropUrlFromUpload: string | null = null;
-  if (episodeFormData.backdrop_url instanceof File) {
-    backdropUrlFromUpload = await uploadImageAndGetUrl(episodeFormData.backdrop_url, 'episode_backdrop');
-  } else if (typeof episodeFormData.backdrop_url === 'string') {
-    backdropUrlFromUpload = episodeFormData.backdrop_url;
+  if (episodeFormData.poster instanceof File) {
+    posterUrlFromUpload = await uploadImageAndGetUrl(episodeFormData.poster, 'episode_poster');
+  } else if (typeof episodeFormData.poster === 'string') {
+    posterUrlFromUpload = episodeFormData.poster;
   }
 
   let videoUrlFromUpload: string | null = null;
-  if (episodeFormData.video_url instanceof File) {
-    videoUrlFromUpload = await uploadVideoAndGetUrl(episodeFormData.video_url, 'episode_video');
-  } else if (typeof episodeFormData.video_url === 'string') {
-    videoUrlFromUpload = episodeFormData.video_url;
+  if (episodeFormData.player_url instanceof File) {
+    videoUrlFromUpload = await uploadVideoAndGetUrl(episodeFormData.player_url, 'episode_video');
+  } else if (typeof episodeFormData.player_url === 'string') {
+    videoUrlFromUpload = episodeFormData.player_url;
   }
 
   const dataToInsert = {
     season_id: seasonId,
     episode_number: episodeFormData.episode_number,
     title: episodeFormData.title,
-    synopsis: episodeFormData.synopsis || null,
-    video_url: videoUrlFromUpload, // Usar a URL do upload ou a string existente
-    poster_url: posterUrlFromUpload,
-    backdrop_url: backdropUrlFromUpload,
-    duration_minutes: episodeFormData.duration_minutes === '' ? null : (Number.isInteger(episodeFormData.duration_minutes) ? episodeFormData.duration_minutes : null),
+    overview: episodeFormData.overview,
+    runtime: episodeFormData.runtime,
+    poster: posterUrlFromUpload || '',
+    player_url: videoUrlFromUpload || '',
   };
 
-  Object.keys(dataToInsert).forEach(keyStr => {
-    const key = keyStr as keyof typeof dataToInsert;
-    if (dataToInsert[key] === undefined) delete dataToInsert[key];
-    if (dataToInsert[key] === '') {
-      const nullableFields = ['synopsis', 'poster_url', 'backdrop_url', 'duration_minutes', 'video_url'];
-      if (nullableFields.includes(key)) (dataToInsert as any)[key] = null;
-    }
-  });
-
-  if (dataToInsert.duration_minutes === '') dataToInsert.duration_minutes = null;
-
   const { data, error } = await supabase.from('episodes').insert(dataToInsert as any).select().single();
-  if (error) { console.error('Error saving episode:', error.message, error.details); throw error; }
+  if (error) { 
+    console.error('Error saving episode:', error.message, error.details); 
+    throw error; 
+  }
   return data as Episode;
 }
 
@@ -301,27 +304,19 @@ export async function saveMovie(
     rating: movieData.rating,
     quality: movieData.quality,
     plot: movieData.plot,
-    poster_url: posterUrlFromUpload,
-    backdrop_url: backdropUrlFromUpload,
-    player_url: videoUrlFromUpload,
+    poster: posterUrlFromUpload || '',
+    backdrop: backdropUrlFromUpload || '',
+    player_url: videoUrlFromUpload || '',
   };
-
-  Object.keys(dataToInsert).forEach(keyStr => {
-    const key = keyStr as keyof typeof dataToInsert;
-    if (dataToInsert[key] === undefined) delete dataToInsert[key];
-    if (dataToInsert[key] === '') {
-      const nonNullableFields: (keyof typeof dataToInsert)[] = ['title', 'year', 'duration', 'rating', 'quality', 'plot'];
-      if (!nonNullableFields.includes(key) || ['poster_url', 'backdrop_url', 'player_url'].includes(key)) {
-         (dataToInsert as any)[key] = null;
-      }
-    }
-  });
 
   const { data, error } = await supabase
     .from('movies')
     .insert(dataToInsert as any)
     .select()
     .single();
-  if (error) { console.error('Error saving movie:', error.message, error.details); throw error; }
+  if (error) { 
+    console.error('Error saving movie:', error.message, error.details); 
+    throw error; 
+  }
   return data as Movie;
 }

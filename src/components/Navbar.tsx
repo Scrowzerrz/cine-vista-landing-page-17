@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, PlayIcon, MenuIcon, XIcon, LogOut, User, Bell, Settings, Upload } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -249,7 +248,7 @@ const Navbar = () => {
                             {profile?.avatar_url ? (
                               <AvatarImage src={profile.avatar_url} alt={profile.username || "Avatar do usuário"} />
                             ) : (
-                              <AvatarFallback className="bg-gradient-to-br from-red-600 via-red-500 to-red-700 text-white font-bold text-sm shadow-xl">
+                              <AvatarFallback className="bg-gradient-to-br from-red-600 to-red-700 text-white font-bold text-sm shadow-xl">
                                 {getInitials()}
                               </AvatarFallback>
                             )}
