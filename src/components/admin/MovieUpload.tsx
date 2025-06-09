@@ -1,17 +1,17 @@
-
 import React, { useState } from 'react';
-import { Upload, Film, Plus, X } from 'lucide-react';
+import { Film } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Form } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import MovieBasicFields from './movie/MovieBasicFields';
+import MovieMediaFields from './movie/MovieMediaFields';
+import MoviePersonnelFields from './movie/MoviePersonnelFields';
+import MoviePlayerManager from './movie/MoviePlayerManager';
 
 const movieSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
@@ -24,10 +24,6 @@ const movieSchema = z.object({
   poster: z.string().url('URL do poster inválida'),
   backdrop: z.string().url('URL do backdrop inválida'),
   playerUrl: z.string().url('URL do player inválida'),
-  actors: z.array(z.string()).optional(),
-  directors: z.array(z.string()).optional(),
-  producers: z.array(z.string()).optional(),
-  categories: z.array(z.string()).optional(),
 });
 
 type MovieFormData = z.infer<typeof movieSchema>;
@@ -55,65 +51,6 @@ const MovieUpload: React.FC = () => {
     }
   });
 
-  const addField = (field: 'actors' | 'directors' | 'producers' | 'categories') => {
-    switch (field) {
-      case 'actors':
-        setActors([...actors, '']);
-        break;
-      case 'directors':
-        setDirectors([...directors, '']);
-        break;
-      case 'producers':
-        setProducers([...producers, '']);
-        break;
-      case 'categories':
-        setCategories([...categories, '']);
-        break;
-    }
-  };
-
-  const removeField = (field: 'actors' | 'directors' | 'producers' | 'categories', index: number) => {
-    switch (field) {
-      case 'actors':
-        setActors(actors.filter((_, i) => i !== index));
-        break;
-      case 'directors':
-        setDirectors(directors.filter((_, i) => i !== index));
-        break;
-      case 'producers':
-        setProducers(producers.filter((_, i) => i !== index));
-        break;
-      case 'categories':
-        setCategories(categories.filter((_, i) => i !== index));
-        break;
-    }
-  };
-
-  const updateField = (field: 'actors' | 'directors' | 'producers' | 'categories', index: number, value: string) => {
-    switch (field) {
-      case 'actors':
-        const newActors = [...actors];
-        newActors[index] = value;
-        setActors(newActors);
-        break;
-      case 'directors':
-        const newDirectors = [...directors];
-        newDirectors[index] = value;
-        setDirectors(newDirectors);
-        break;
-      case 'producers':
-        const newProducers = [...producers];
-        newProducers[index] = value;
-        setProducers(newProducers);
-        break;
-      case 'categories':
-        const newCategories = [...categories];
-        newCategories[index] = value;
-        setCategories(newCategories);
-        break;
-    }
-  };
-
   const onSubmit = async (data: MovieFormData) => {
     setLoading(true);
     try {
@@ -137,10 +74,9 @@ const MovieUpload: React.FC = () => {
 
       if (movieError) throw movieError;
 
-      // Insert related data
       const movieId = movieData.id;
 
-      // Insert actors
+      // Insert related data
       if (actors.some(actor => actor.trim())) {
         const actorNames = actors.filter(actor => actor.trim());
         for (const actorName of actorNames) {
@@ -236,221 +172,46 @@ const MovieUpload: React.FC = () => {
     }
   };
 
-  const renderFieldArray = (
-    title: string,
-    field: 'actors' | 'directors' | 'producers' | 'categories',
-    values: string[]
-  ) => (
-    <div className="space-y-3">
-      <div className="flex items-center justify-between">
-        <Label className="text-white">{title}</Label>
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          onClick={() => addField(field)}
-          className="text-gray-300 border-gray-600 hover:bg-gray-700"
-        >
-          <Plus className="w-4 h-4 mr-1" />
-          Adicionar
-        </Button>
-      </div>
-      {values.map((value, index) => (
-        <div key={index} className="flex gap-2">
-          <Input
-            value={value}
-            onChange={(e) => updateField(field, index, e.target.value)}
-            placeholder={`Nome ${title.toLowerCase().slice(0, -1)}`}
-            className="bg-gray-800 border-gray-600 text-white"
-          />
-          {values.length > 1 && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => removeField(field, index)}
-              className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-            >
-              <X className="w-4 h-4" />
-            </Button>
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
   return (
     <Card className="bg-gray-900 border-gray-800">
       <CardHeader>
         <CardTitle className="text-white flex items-center gap-2">
           <Film className="w-5 h-5" />
-          Adicionar Filme
+          Adicionar Filme Completo
         </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Título *</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="originalTitle"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Título Original</FormLabel>
-                    <FormControl>
-                      <Input {...field} className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="year"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Ano *</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="number" className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="duration"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Duração *</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="ex: 120 min" className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rating"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Classificação *</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="ex: 8.5" className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="quality"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">Qualidade *</FormLabel>
-                    <FormControl>
-                      <Input {...field} placeholder="ex: HD, 4K" className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <FormField
-              control={form.control}
-              name="plot"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Sinopse *</FormLabel>
-                  <FormControl>
-                    <Textarea {...field} rows={4} className="bg-gray-800 border-gray-600 text-white" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <MovieBasicFields form={form} />
+            
+            <MovieMediaFields form={form} />
+            
+            <MoviePlayerManager
+              playerUrl={form.watch('playerUrl')}
+              onPlayerUrlChange={(url) => form.setValue('playerUrl', url)}
+            />
+            
+            <MoviePersonnelFields
+              actors={actors}
+              directors={directors}
+              producers={producers}
+              categories={categories}
+              setActors={setActors}
+              setDirectors={setDirectors}
+              setProducers={setProducers}
+              setCategories={setCategories}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <FormField
-                control={form.control}
-                name="poster"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">URL do Poster *</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="backdrop"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-white">URL do Backdrop *</FormLabel>
-                    <FormControl>
-                      <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="pt-4 border-t border-gray-700">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3"
+              >
+                {loading ? 'Adicionando Filme...' : 'Adicionar Filme Completo'}
+              </Button>
             </div>
-
-            <FormField
-              control={form.control}
-              name="playerUrl"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">URL do Player *</FormLabel>
-                  <FormControl>
-                    <Input {...field} type="url" className="bg-gray-800 border-gray-600 text-white" />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderFieldArray('Atores', 'actors', actors)}
-              {renderFieldArray('Diretores', 'directors', directors)}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {renderFieldArray('Produtores', 'producers', producers)}
-              {renderFieldArray('Categorias', 'categories', categories)}
-            </div>
-
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-red-600 hover:bg-red-700 text-white"
-            >
-              {loading ? 'Adicionando...' : 'Adicionar Filme'}
-            </Button>
           </form>
         </Form>
       </CardContent>

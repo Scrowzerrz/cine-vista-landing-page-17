@@ -1,16 +1,19 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { LucideIcon } from 'lucide-react';
+import { ChevronDown, ChevronUp, LucideIcon } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface UploadCardProps {
   title: string;
   description: string;
   icon: LucideIcon;
   color: string;
+  isExpanded: boolean;
+  onToggle: () => void;
   children: React.ReactNode;
-  isExpanded?: boolean;
-  onToggle?: () => void;
+  badge?: string;
 }
 
 const UploadCard: React.FC<UploadCardProps> = ({
@@ -18,55 +21,67 @@ const UploadCard: React.FC<UploadCardProps> = ({
   description,
   icon: Icon,
   color,
+  isExpanded,
+  onToggle,
   children,
-  isExpanded = false,
-  onToggle
+  badge
 }) => {
   return (
     <motion.div
-      layout
-      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${color} border border-gray-700/50 shadow-2xl`}
-      whileHover={{ y: -4, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
-      transition={{ duration: 0.3 }}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className={`${isExpanded ? 'lg:col-span-3' : 'lg:col-span-1'} transition-all duration-300`}
     >
-      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-transparent pointer-events-none" />
-      
-      <div 
-        className="p-6 cursor-pointer select-none"
-        onClick={onToggle}
-      >
-        <div className="flex items-center gap-4 mb-4">
-          <div className={`p-3 rounded-xl bg-white/10 backdrop-blur-sm`}>
-            <Icon className="w-6 h-6 text-white" />
+      <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-700/50 overflow-hidden">
+        <CardHeader 
+          className={`bg-gradient-to-r ${color} relative cursor-pointer`}
+          onClick={onToggle}
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white/20 rounded-lg">
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <CardTitle className="text-white flex items-center gap-2">
+                  {title}
+                  {badge && (
+                    <span className="px-2 py-1 text-xs bg-white/20 rounded-full">
+                      {badge}
+                    </span>
+                  )}
+                </CardTitle>
+                <p className="text-white/80 text-sm">{description}</p>
+              </div>
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-white hover:bg-white/20"
+            >
+              {isExpanded ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </Button>
           </div>
-          <div className="flex-1">
-            <h3 className="text-xl font-bold text-white mb-1">{title}</h3>
-            <p className="text-white/70 text-sm">{description}</p>
-          </div>
+        </CardHeader>
+        
+        {isExpanded && (
           <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.3 }}
-            className="text-white/70"
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
+            <CardContent className="p-6">
+              {children}
+            </CardContent>
           </motion.div>
-        </div>
-      </div>
-
-      <motion.div
-        initial={false}
-        animate={{ height: isExpanded ? 'auto' : 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="overflow-hidden"
-      >
-        <div className="px-6 pb-6 border-t border-white/10">
-          <div className="pt-6">
-            {children}
-          </div>
-        </div>
-      </motion.div>
+        )}
+      </Card>
     </motion.div>
   );
 };
