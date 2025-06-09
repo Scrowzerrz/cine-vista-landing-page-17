@@ -6,10 +6,10 @@ export interface Episode {
   episode_number: number;
   title: string;
   overview?: string;
-  video_url: string; // URL do vídeo
+  video_url: string; // URL do vídeo (mapped from player_url in DB)
   runtime?: string;
   poster?: string; // Thumbnail/poster do episódio
-  player_url?: string; // URL do player
+  player_url?: string; // URL do player (DB field)
   created_at: string; // ISO date string
   updated_at: string; // ISO date string
 }
@@ -17,7 +17,7 @@ export interface Episode {
 // Representa uma temporada de uma série, contendo múltiplos episódios
 export interface Season {
   id: string; // uuid
-  tvshow_id: string; // uuid, FK to TVShow
+  tvshow_id: string; // uuid, FK to TVShow (mapped from tvshow_id in DB)
   season_number: number;
   year: string;
   episode_count?: number;

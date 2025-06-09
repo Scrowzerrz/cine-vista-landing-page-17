@@ -204,7 +204,11 @@ export async function saveTvShow(tvShowFormData: Partial<TVShow> & {
     console.error('Error saving TV show:', error.message, error.details); 
     throw error; 
   }
-  return data as TVShow;
+  return {
+    ...data,
+    tvshow_id: data.id, // Map for interface compatibility
+    updated_at: data.updated_at || new Date().toISOString()
+  } as TVShow;
 }
 
 export async function saveSeason(seasonFormData: {
@@ -222,7 +226,10 @@ export async function saveSeason(seasonFormData: {
     console.error('Error saving season:', error.message, error.details); 
     throw error; 
   }
-  return data as Season;
+  return {
+    ...data,
+    updated_at: data.updated_at || new Date().toISOString()
+  } as Season;
 }
 
 export async function saveEpisode(
@@ -231,8 +238,8 @@ export async function saveEpisode(
     title: string;
     overview: string;
     runtime: string;
-    poster?: File | string;
-    player_url?: File | string;
+    poster?: File | string | null;
+    player_url?: File | string | null;
   },
   seasonId: string
 ): Promise<Episode> {
@@ -266,15 +273,19 @@ export async function saveEpisode(
     console.error('Error saving episode:', error.message, error.details); 
     throw error; 
   }
-  return data as Episode;
+  return {
+    ...data,
+    video_url: data.player_url, // Map for interface compatibility
+    updated_at: data.updated_at || new Date().toISOString()
+  } as Episode;
 }
 
 // --- Função para salvar Filme ---
 export async function saveMovie(
   movieData: Partial<Movie> & {
-    poster?: File | string;
-    backdrop?: File | string;
-    player_url?: File | string;
+    poster?: File | string | null;
+    backdrop?: File | string | null;
+    player_url?: File | string | null;
   }
 ): Promise<Movie> {
 
