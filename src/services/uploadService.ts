@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { TVShow, Season, Episode } from '@/types/tvshow';
 import { Movie } from '@/types/movie';
@@ -161,16 +162,18 @@ export async function saveTvShow(tvShowFormData: Partial<TVShow> & {
   quality?: string;
   network?: string;
   creator?: string;
+  totalSeasons?: number;
+  totalEpisodes?: number;
 }): Promise<TVShow> {
   let posterUrlFromUpload: string | null = null;
-  if (tvShowFormData.poster instanceof File) {
+  if (tvShowFormData.poster && tvShowFormData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(tvShowFormData.poster, 'tvshow_poster');
   } else if (typeof tvShowFormData.poster === 'string') {
     posterUrlFromUpload = tvShowFormData.poster;
   }
 
   let backdropUrlFromUpload: string | null = null;
-  if (tvShowFormData.backdrop instanceof File) {
+  if (tvShowFormData.backdrop && tvShowFormData.backdrop instanceof File) {
     backdropUrlFromUpload = await uploadImageAndGetUrl(tvShowFormData.backdrop, 'tvshow_backdrop');
   } else if (typeof tvShowFormData.backdrop === 'string') {
     backdropUrlFromUpload = tvShowFormData.backdrop;
@@ -187,8 +190,8 @@ export async function saveTvShow(tvShowFormData: Partial<TVShow> & {
     backdrop: backdropUrlFromUpload,
     network: tvShowFormData.network || null,
     creator: tvShowFormData.creator || null,
-    total_seasons: tvShowFormData.total_seasons || 1,
-    total_episodes: tvShowFormData.total_episodes || 1,
+    total_seasons: tvShowFormData.totalSeasons || 1,
+    total_episodes: tvShowFormData.totalEpisodes || 1,
   };
 
   Object.keys(dataToInsert).forEach(keyStr => {
@@ -235,14 +238,14 @@ export async function saveEpisode(
 ): Promise<Episode> {
 
   let posterUrlFromUpload: string | null = null;
-  if (episodeFormData.poster instanceof File) {
+  if (episodeFormData.poster && episodeFormData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(episodeFormData.poster, 'episode_poster');
   } else if (typeof episodeFormData.poster === 'string') {
     posterUrlFromUpload = episodeFormData.poster;
   }
 
   let videoUrlFromUpload: string | null = null;
-  if (episodeFormData.player_url instanceof File) {
+  if (episodeFormData.player_url && episodeFormData.player_url instanceof File) {
     videoUrlFromUpload = await uploadVideoAndGetUrl(episodeFormData.player_url, 'episode_video');
   } else if (typeof episodeFormData.player_url === 'string') {
     videoUrlFromUpload = episodeFormData.player_url;
@@ -276,21 +279,21 @@ export async function saveMovie(
 ): Promise<Movie> {
 
   let posterUrlFromUpload: string | null = null;
-  if (movieData.poster instanceof File) {
+  if (movieData.poster && movieData.poster instanceof File) {
     posterUrlFromUpload = await uploadImageAndGetUrl(movieData.poster, 'movie_poster');
   } else if (typeof movieData.poster === 'string') {
     posterUrlFromUpload = movieData.poster;
   }
 
   let backdropUrlFromUpload: string | null = null;
-  if (movieData.backdrop instanceof File) {
+  if (movieData.backdrop && movieData.backdrop instanceof File) {
     backdropUrlFromUpload = await uploadImageAndGetUrl(movieData.backdrop, 'movie_backdrop');
   } else if (typeof movieData.backdrop === 'string') {
     backdropUrlFromUpload = movieData.backdrop;
   }
 
   let videoUrlFromUpload: string | null = null;
-  if (movieData.player_url instanceof File) {
+  if (movieData.player_url && movieData.player_url instanceof File) {
     videoUrlFromUpload = await uploadVideoAndGetUrl(movieData.player_url, 'movie_video');
   } else if (typeof movieData.player_url === 'string') {
     videoUrlFromUpload = movieData.player_url;
