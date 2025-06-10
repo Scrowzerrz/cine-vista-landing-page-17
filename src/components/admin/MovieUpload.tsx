@@ -135,26 +135,67 @@ const MovieUpload: React.FC = () => {
         .select()
         .single();
 
-      if (movieError) throw movieError;
+      if (movieError) {
+        console.error('Supabase Movie Insert Error:', movieError);
+        throw new Error(`Erro ao registrar os dados principais do filme: ${movieError.message}. Por favor, verifique os campos do formulário.`);
+      }
+      if (!movieData) {
+        throw new Error('Falha ao registrar o filme: nenhum dado retornado pelo servidor.');
+      }
 
-      // Insert related data
       const movieId = movieData.id;
+      const movieTitle = data.title;
+
+      // Helper function for inserting related data to avoid repetition
+      const insertRelatedData = async (
+        itemType: 'ator' | 'diretor' | 'produtor' | 'categoria',
+        itemName: string,
+        tableName: 'actors' | 'directors' | 'producers' | 'categories',
+        junctionTable: 'movie_actors' | 'movie_directors' | 'movie_producers' | 'movie_categories',
+        columnName: 'actor_id' | 'director_id' | 'producer_id' | 'category_id'
+      ) => {
+        try {
+          const { data: relatedData, error: relatedError } = await supabase
+            .from(tableName)
+            .upsert({ name: itemName.trim() }, { onConflict: 'name' })
+            .select()
+            .single();
+
+          if (relatedError) {
+            console.error(`Supabase ${itemType} Upsert Error for "${itemName}":`, relatedError);
+            throw new Error(`Erro ao adicionar/atualizar ${itemType} '${itemName}': ${relatedError.message}`);
+          }
+          if (!relatedData) {
+            throw new Error(`Falha ao adicionar/atualizar ${itemType} '${itemName}', nenhum dado retornado.`);
+          }
+
+          const { error: junctionError } = await supabase
+            .from(junctionTable)
+            .insert({ movie_id: movieId, [columnName]: relatedData.id });
+
+          if (junctionError) {
+            console.error(`Supabase Junction Table Insert Error for ${itemType} "${itemName}" to movie "${movieTitle}":`, junctionError);
+            // Check for unique constraint violation (e.g., if the relationship already exists)
+            if (junctionError.code === '23505') { // PostgreSQL unique violation code
+                 console.warn(`A relação entre o filme '${movieTitle}' e ${itemType} '${itemName}' já existe.`);
+                 // Optionally, inform the user this specific link wasn't re-added if it's not critical
+            } else {
+                throw new Error(`Erro ao associar ${itemType} '${itemName}' com o filme '${movieTitle}': ${junctionError.message}`);
+            }
+          }
+        } catch (error) {
+          // Rethrow to be caught by the main onSubmit catch block, which will show a toast
+          const specificError = error instanceof Error ? error.message : String(error);
+          toast({ title: `Erro ao processar ${itemType}`, description: specificError, variant: 'destructive' });
+          throw error;
+        }
+      };
 
       // Insert actors
       if (actors.some(actor => actor.trim())) {
         const actorNames = actors.filter(actor => actor.trim());
         for (const actorName of actorNames) {
-          const { data: actorData, error: actorError } = await supabase
-            .from('actors')
-            .upsert({ name: actorName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!actorError && actorData) {
-            await supabase
-              .from('movie_actors')
-              .insert({ movie_id: movieId, actor_id: actorData.id });
-          }
+          await insertRelatedData('ator', actorName, 'actors', 'movie_actors', 'actor_id');
         }
       }
 
@@ -162,17 +203,7 @@ const MovieUpload: React.FC = () => {
       if (directors.some(director => director.trim())) {
         const directorNames = directors.filter(director => director.trim());
         for (const directorName of directorNames) {
-          const { data: directorData, error: directorError } = await supabase
-            .from('directors')
-            .upsert({ name: directorName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!directorError && directorData) {
-            await supabase
-              .from('movie_directors')
-              .insert({ movie_id: movieId, director_id: directorData.id });
-          }
+          await insertRelatedData('diretor', directorName, 'directors', 'movie_directors', 'director_id');
         }
       }
 
@@ -180,17 +211,7 @@ const MovieUpload: React.FC = () => {
       if (producers.some(producer => producer.trim())) {
         const producerNames = producers.filter(producer => producer.trim());
         for (const producerName of producerNames) {
-          const { data: producerData, error: producerError } = await supabase
-            .from('producers')
-            .upsert({ name: producerName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!producerError && producerData) {
-            await supabase
-              .from('movie_producers')
-              .insert({ movie_id: movieId, producer_id: producerData.id });
-          }
+          await insertRelatedData('produtor', producerName, 'producers', 'movie_producers', 'producer_id');
         }
       }
 
@@ -198,23 +219,13 @@ const MovieUpload: React.FC = () => {
       if (categories.some(category => category.trim())) {
         const categoryNames = categories.filter(category => category.trim());
         for (const categoryName of categoryNames) {
-          const { data: categoryData, error: categoryError } = await supabase
-            .from('categories')
-            .upsert({ name: categoryName.trim() }, { onConflict: 'name' })
-            .select()
-            .single();
-
-          if (!categoryError && categoryData) {
-            await supabase
-              .from('movie_categories')
-              .insert({ movie_id: movieId, category_id: categoryData.id });
-          }
+          await insertRelatedData('categoria', categoryName, 'categories', 'movie_categories', 'category_id');
         }
       }
 
       toast({
         title: 'Sucesso!',
-        description: 'Filme adicionado com sucesso!',
+        description: `Filme '${movieTitle}' e todos os seus dados foram adicionados com sucesso!`,
       });
 
       // Reset form
@@ -224,11 +235,12 @@ const MovieUpload: React.FC = () => {
       setProducers(['']);
       setCategories(['']);
 
-    } catch (error) {
-      console.error('Error uploading movie:', error);
+    } catch (error: any) {
+      console.error('Error uploading movie (outer catch):', error);
+      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro inesperado ao adicionar o filme. Por favor, tente novamente.';
       toast({
-        title: 'Erro',
-        description: 'Erro ao adicionar filme. Tente novamente.',
+        title: 'Erro na Adição do Filme',
+        description: errorMessage,
         variant: 'destructive',
       });
     } finally {
