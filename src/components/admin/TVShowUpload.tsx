@@ -410,6 +410,7 @@ const TVShowUpload: React.FC = () => {
         backdrop: '',
         network: '',
         creator: '',
+        seasons: [] // Ensure this line is present
       });
       setActors(['']); // Reset local state for actors, etc.
       setDirectors(['']);
