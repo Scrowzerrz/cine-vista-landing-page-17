@@ -1,19 +1,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronDown, ChevronUp, LucideIcon } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { LucideIcon } from 'lucide-react';
 
 interface UploadCardProps {
   title: string;
   description: string;
   icon: LucideIcon;
   color: string;
-  isExpanded: boolean;
-  onToggle: () => void;
   children: React.ReactNode;
-  badge?: string;
+  isExpanded?: boolean;
+  onToggle?: () => void;
 }
 
 const UploadCard: React.FC<UploadCardProps> = ({
@@ -21,67 +18,55 @@ const UploadCard: React.FC<UploadCardProps> = ({
   description,
   icon: Icon,
   color,
-  isExpanded,
-  onToggle,
   children,
-  badge
+  isExpanded = false,
+  onToggle
 }) => {
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className={`${isExpanded ? 'lg:col-span-3' : 'lg:col-span-1'} transition-all duration-300`}
+      layout
+      className={`relative overflow-hidden rounded-2xl bg-gradient-to-br ${color} border border-gray-700/50 shadow-2xl`}
+      whileHover={{ y: -4, boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.5)" }}
+      transition={{ duration: 0.3 }}
     >
-      <Card className="bg-gray-900/50 backdrop-blur-sm border-gray-700/50 overflow-hidden">
-        <CardHeader 
-          className={`bg-gradient-to-r ${color} relative cursor-pointer`}
-          onClick={onToggle}
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-white/20 rounded-lg">
-                <Icon className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <CardTitle className="text-white flex items-center gap-2">
-                  {title}
-                  {badge && (
-                    <span className="px-2 py-1 text-xs bg-white/20 rounded-full">
-                      {badge}
-                    </span>
-                  )}
-                </CardTitle>
-                <p className="text-white/80 text-sm">{description}</p>
-              </div>
-            </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-white hover:bg-white/20"
-            >
-              {isExpanded ? (
-                <ChevronUp className="w-5 h-5" />
-              ) : (
-                <ChevronDown className="w-5 h-5" />
-              )}
-            </Button>
+      <div className="absolute inset-0 bg-gradient-to-br from-white/[0.08] to-transparent pointer-events-none" />
+      
+      <div 
+        className="p-6 cursor-pointer select-none"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-4 mb-4">
+          <div className={`p-3 rounded-xl bg-white/10 backdrop-blur-sm`}>
+            <Icon className="w-6 h-6 text-white" />
           </div>
-        </CardHeader>
-        
-        {isExpanded && (
+          <div className="flex-1">
+            <h3 className="text-xl font-bold text-white mb-1">{title}</h3>
+            <p className="text-white/70 text-sm">{description}</p>
+          </div>
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            animate={{ rotate: isExpanded ? 180 : 0 }}
             transition={{ duration: 0.3 }}
+            className="text-white/70"
           >
-            <CardContent className="p-6">
-              {children}
-            </CardContent>
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
           </motion.div>
-        )}
-      </Card>
+        </div>
+      </div>
+
+      <motion.div
+        initial={false}
+        animate={{ height: isExpanded ? 'auto' : 0 }}
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="overflow-hidden"
+      >
+        <div className="px-6 pb-6 border-t border-white/10">
+          <div className="pt-6">
+            {children}
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   );
 };

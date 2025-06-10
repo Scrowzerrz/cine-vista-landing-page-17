@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
@@ -9,9 +10,7 @@ import {
   CheckCircle, 
   XCircle,
   RefreshCw,
-  TrendingUp,
-  Play,
-  Layers
+  TrendingUp
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getAllUploads, updateUploadStatus, deleteUpload, MediaUpload } from '@/services/uploadService';
@@ -137,8 +136,8 @@ const UploadsPanel: React.FC = () => {
         className="flex items-center justify-between"
       >
         <div>
-          <h1 className="text-4xl font-bold text-white mb-2">Painel de Uploads Avançado</h1>
-          <p className="text-gray-400">Sistema completo de gerenciamento de conteúdo com temporadas, episódios e players</p>
+          <h1 className="text-4xl font-bold text-white mb-2">Painel de Uploads</h1>
+          <p className="text-gray-400">Gerencie todos os seus arquivos de mídia em um só lugar</p>
         </div>
         <Button 
           onClick={loadUploads} 
@@ -181,40 +180,37 @@ const UploadsPanel: React.FC = () => {
         />
       </div>
 
-      {/* Enhanced Upload Cards */}
+      {/* Upload Cards */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <UploadCard
-          title="Sistema de Filmes"
-          description="Upload completo com player integrado e metadados"
+          title="Upload de Filmes"
+          description="Adicione novos filmes à plataforma"
           icon={Film}
           color="from-purple-600 to-indigo-700"
           isExpanded={expandedCards.movies}
           onToggle={() => toggleCard('movies')}
-          badge="Player Incluído"
         >
           <MovieUpload />
         </UploadCard>
 
         <UploadCard
-          title="Sistema de Séries"
-          description="Gerenciamento completo de temporadas e episódios"
+          title="Upload de Séries"
+          description="Gerencie séries e episódios"
           icon={Tv}
           color="from-emerald-600 to-teal-700"
           isExpanded={expandedCards.tvshows}
           onToggle={() => toggleCard('tvshows')}
-          badge="Temporadas & Episódios"
         >
           <TVShowUpload />
         </UploadCard>
 
         <UploadCard
           title="Upload de Mídia"
-          description="Envie imagens, trailers e outros arquivos"
+          description="Envie imagens e outros arquivos"
           icon={Upload}
           color="from-orange-600 to-red-700"
           isExpanded={expandedCards.media}
           onToggle={() => toggleCard('media')}
-          badge="Múltiplos Formatos"
         >
           <FileUpload onUploadSuccess={loadUploads} />
         </UploadCard>
