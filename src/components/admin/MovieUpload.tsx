@@ -16,7 +16,7 @@ import { supabase } from '@/integrations/supabase/client';
 const movieSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   originalTitle: z.string().optional(),
-  year: z.string().min(4, 'Ano deve ter 4 dígitos'),
+  year: z.string().length(4, 'Ano deve ter 4 dígitos').regex(/^\d{4}$/, 'Ano deve conter apenas números'),
   duration: z.string().min(1, 'Duração é obrigatória'),
   rating: z.string().min(1, 'Classificação é obrigatória'),
   quality: z.string().min(1, 'Qualidade é obrigatória'),

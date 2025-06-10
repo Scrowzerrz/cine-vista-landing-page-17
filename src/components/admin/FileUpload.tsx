@@ -45,15 +45,27 @@ const FileUpload: React.FC<FileUploadProps> = ({ onUploadSuccess }) => {
   };
 
   const handleFileSelect = (file: File) => {
-    if (file.type.startsWith('image/')) {
-      setSelectedFile(file);
-    } else {
+    const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: 'Erro',
-        description: 'Por favor, selecione apenas arquivos de imagem.',
+        title: 'Erro: Tipo de Arquivo Inválido',
+        description: 'Por favor, selecione apenas arquivos de imagem (PNG, JPG, JPEG).',
         variant: 'destructive'
       });
+      return;
     }
+
+    if (file.size > MAX_FILE_SIZE) {
+      toast({
+        title: 'Erro: Arquivo Muito Grande',
+        description: `O arquivo "${file.name}" excede o limite de 10MB. Por favor, selecione um arquivo menor.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    setSelectedFile(file);
   };
 
   const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

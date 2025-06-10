@@ -10,9 +10,18 @@ import {
   CheckCircle, 
   XCircle,
   RefreshCw,
-  TrendingUp
+  AlertTriangle // For delete confirmation
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogClose,
+} from "@/components/ui/dialog";
 import { getAllUploads, updateUploadStatus, deleteUpload, MediaUpload } from '@/services/uploadService';
 import { toast } from '@/hooks/use-toast';
 import FileUpload from './FileUpload';
@@ -27,6 +36,8 @@ const UploadsPanel: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('all');
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [uploadToDelete, setUploadToDelete] = useState<{ id: string, filePath: string } | null>(null);
   const [expandedCards, setExpandedCards] = useState<Record<string, boolean>>({
     movies: false,
     tvshows: false,
@@ -74,14 +85,17 @@ const UploadsPanel: React.FC = () => {
     }
   };
 
-  const handleDelete = async (id: string, filePath: string) => {
-    if (!confirm('Tem certeza que deseja deletar este arquivo?')) {
-      return;
-    }
+  const handleDelete = (id: string, filePath: string) => {
+    setUploadToDelete({ id, filePath });
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!uploadToDelete) return;
 
     try {
-      await deleteUpload(id, filePath);
-      await loadUploads();
+      await deleteUpload(uploadToDelete.id, uploadToDelete.filePath);
+      await loadUploads(); // Or optimistically update UI
       toast({
         title: 'Sucesso',
         description: 'Arquivo deletado com sucesso.'
@@ -93,6 +107,9 @@ const UploadsPanel: React.FC = () => {
         description: 'Erro ao deletar arquivo.',
         variant: 'destructive'
       });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setUploadToDelete(null);
     }
   };
 
@@ -263,6 +280,32 @@ const UploadsPanel: React.FC = () => {
           updatingStatus={updatingStatus}
         />
       </motion.div>
+
+      {/* Delete Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[425px] bg-gray-850 border-gray-700 text-white">
+          <DialogHeader>
+            <DialogTitle className="flex items-center">
+              <AlertTriangle className="w-5 h-5 mr-2 text-yellow-400" />
+              Confirmar Exclusão
+            </DialogTitle>
+            <DialogDescription className="text-gray-400 pt-2">
+              Tem certeza que deseja deletar este arquivo? Esta ação não pode ser desfeita.
+              {uploadToDelete && <p className="font-medium text-gray-300 mt-2 break-all">Arquivo: {uploadToDelete.filePath}</p>}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-4">
+            <DialogClose asChild>
+              <Button variant="outline" className="text-gray-300 border-gray-600 hover:bg-gray-700">
+                Cancelar
+              </Button>
+            </DialogClose>
+            <Button variant="destructive" onClick={confirmDelete} className="bg-red-600 hover:bg-red-700">
+              Deletar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
