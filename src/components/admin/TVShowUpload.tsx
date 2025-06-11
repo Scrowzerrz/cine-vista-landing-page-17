@@ -13,21 +13,6 @@ import { z } from 'zod';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 
-const episodeSchema = z.object({
-  episode_number: z.number().min(1),
-  title: z.string().min(1, 'Título do episódio é obrigatório'),
-  player_url: z.string().url('URL do player inválida'),
-  poster: z.string().url('URL do poster inválida').optional().or(z.literal('')),
-  overview: z.string().min(1, 'Sinopse do episódio é obrigatória'),
-  runtime: z.string().min(1, 'Duração do episódio é obrigatória'),
-});
-
-const seasonSchema = z.object({
-  season_number: z.number().min(1),
-  year: z.string().min(4, 'Ano deve ter 4 dígitos'),
-  episodes: z.array(episodeSchema).min(1, 'A temporada deve ter pelo menos um episódio'),
-});
-
 const tvshowSchema = z.object({
   title: z.string().min(1, 'Título é obrigatório'),
   originalTitle: z.string().optional(),
@@ -37,32 +22,17 @@ const tvshowSchema = z.object({
   plot: z.string().min(10, 'Sinopse deve ter pelo menos 10 caracteres'),
   poster: z.string().url('URL do poster inválida'),
   backdrop: z.string().url('URL do backdrop inválida'),
+  totalSeasons: z.number().min(1, 'Deve ter pelo menos 1 temporada'),
+  totalEpisodes: z.number().min(1, 'Deve ter pelo menos 1 episódio'),
   network: z.string().optional(),
   creator: z.string().optional(),
   actors: z.array(z.string()).optional(),
   directors: z.array(z.string()).optional(),
   producers: z.array(z.string()).optional(),
   categories: z.array(z.string()).optional(),
-  seasons: z.array(seasonSchema).min(1, 'A série deve ter pelo menos uma temporada'),
 });
 
 type TVShowFormData = z.infer<typeof tvshowSchema>;
-
-// Define types for Season and Episode based on state structure, not Zod schema directly for flexibility with partial data during input
-interface EpisodeState {
-  episode_number: number;
-  title: string;
-  player_url: string;
-  poster: string;
-  overview: string;
-  runtime: string;
-}
-
-interface SeasonState {
-  season_number: number;
-  year: string;
-  episodes: EpisodeState[];
-}
 
 const TVShowUpload: React.FC = () => {
   const [loading, setLoading] = useState(false);
@@ -70,10 +40,6 @@ const TVShowUpload: React.FC = () => {
   const [directors, setDirectors] = useState<string[]>(['']);
   const [producers, setProducers] = useState<string[]>(['']);
   const [categories, setCategories] = useState<string[]>(['']);
-
-  const initialEpisode: EpisodeState = { episode_number: 1, title: '', player_url: '', poster: '', overview: '', runtime: '' };
-  const initialSeason: SeasonState = { season_number: 1, year: '', episodes: [initialEpisode] };
-  const [seasons, setSeasons] = useState<SeasonState[]>([initialSeason]);
 
   const form = useForm<TVShowFormData>({
     resolver: zodResolver(tvshowSchema),
@@ -86,77 +52,12 @@ const TVShowUpload: React.FC = () => {
       plot: '',
       poster: '',
       backdrop: '',
+      totalSeasons: 1,
+      totalEpisodes: 1,
       network: '',
       creator: '',
-      seasons: [], // Added as per request
-      // The 'seasons' state will populate this for submission validation
     }
   });
-
-  // SEASONS AND EPISODES HANDLERS
-  const handleSeasonChange = (seasonIndex: number, field: keyof Omit<SeasonState, 'episodes' | 'season_number'>, value: string) => {
-    const updatedSeasons = [...seasons];
-    updatedSeasons[seasonIndex][field] = value;
-    setSeasons(updatedSeasons);
-  };
-
-  const handleEpisodeChange = (seasonIndex: number, episodeIndex: number, field: keyof Omit<EpisodeState, 'episode_number'>, value: string) => {
-    const updatedSeasons = [...seasons];
-    updatedSeasons[seasonIndex].episodes[episodeIndex][field] = value;
-    setSeasons(updatedSeasons);
-  };
-
-  const addSeason = () => {
-    setSeasons([
-      ...seasons,
-      {
-        season_number: seasons.length + 1,
-        year: '',
-        episodes: [{ episode_number: 1, title: '', player_url: '', poster: '', overview: '', runtime: '' }],
-      },
-    ]);
-  };
-
-  const removeSeason = (seasonIndex: number) => {
-    if (seasons.length > 1) {
-      const updatedSeasons = seasons.filter((_, index) => index !== seasonIndex);
-      // Re-number seasons
-      setSeasons(updatedSeasons.map((season, index) => ({ ...season, season_number: index + 1 })));
-    } else {
-      toast({ title: "Atenção", description: "A série deve ter pelo menos uma temporada.", variant: "default" });
-    }
-  };
-
-  const addEpisode = (seasonIndex: number) => {
-    const updatedSeasons = [...seasons];
-    updatedSeasons[seasonIndex].episodes.push({
-      episode_number: updatedSeasons[seasonIndex].episodes.length + 1,
-      title: '',
-      player_url: '',
-      poster: '',
-      overview: '',
-      runtime: '',
-    });
-    setSeasons(updatedSeasons);
-  };
-
-  const removeEpisode = (seasonIndex: number, episodeIndex: number) => {
-    const updatedSeasons = [...seasons];
-    if (updatedSeasons[seasonIndex].episodes.length > 1) {
-      updatedSeasons[seasonIndex].episodes = updatedSeasons[seasonIndex].episodes.filter(
-        (_, index) => index !== episodeIndex
-      );
-      // Re-number episodes
-      updatedSeasons[seasonIndex].episodes = updatedSeasons[seasonIndex].episodes.map((ep, index) => ({
-        ...ep,
-        episode_number: index + 1,
-      }));
-      setSeasons(updatedSeasons);
-    } else {
-      toast({ title: "Atenção", description: "A temporada deve ter pelo menos um episódio.", variant: "default" });
-    }
-  };
-
 
   const addField = (field: 'actors' | 'directors' | 'producers' | 'categories') => {
     switch (field) {
@@ -217,111 +118,35 @@ const TVShowUpload: React.FC = () => {
     }
   };
 
-  const onSubmit = async (formData: TVShowFormData) => {
+  const onSubmit = async (data: TVShowFormData) => {
     setLoading(true);
     try {
-      // Validate seasons data manually or ensure it's correctly typed for Zod
-      const validatedSeasons = seasons.map(s => ({
-        ...s,
-        episodes: s.episodes.map(e => ({
-          ...e,
-          episode_number: Number(e.episode_number),
-        })),
-        season_number: Number(s.season_number),
-      }));
-
-      const finalData = { ...formData, seasons: validatedSeasons };
-      // This will throw if finalData (including seasons from state) is invalid
-      tvshowSchema.parse(finalData);
-
-
       // Insert tvshow
       const { data: tvshowData, error: tvshowError } = await supabase
         .from('tvshows')
         .insert({
-          title: finalData.title,
-          original_title: finalData.originalTitle || null,
-          year: finalData.year, // Main show year, can be first season's year or distinct
-          rating: finalData.rating,
-          quality: finalData.quality,
-          plot: finalData.plot,
-          poster: finalData.poster,
-          backdrop: finalData.backdrop,
-          // total_seasons and total_episodes are removed, will be derived if needed or stored differently
-          network: finalData.network || null,
-          creator: finalData.creator || null,
+          title: data.title,
+          original_title: data.originalTitle || null,
+          year: data.year,
+          rating: data.rating,
+          quality: data.quality,
+          plot: data.plot,
+          poster: data.poster,
+          backdrop: data.backdrop,
+          total_seasons: data.totalSeasons,
+          total_episodes: data.totalEpisodes,
+          network: data.network || null,
+          creator: data.creator || null,
         })
         .select()
         .single();
 
-      if (tvshowError) {
-        console.error('Supabase TVShow Insert Error:', tvshowError);
-        throw new Error(`Erro ao registrar os dados principais da série: ${tvshowError.message}. Por favor, verifique os campos do formulário.`);
-      }
-      if (!tvshowData) throw new Error('Falha ao registrar a série: nenhum dado retornado pelo servidor.');
+      if (tvshowError) throw tvshowError;
 
+      // Insert related data
       const tvshowId = tvshowData.id;
-      const tvshowTitle = finalData.title;
 
-      // Loop through seasons from state
-      for (const season of validatedSeasons) {
-        try {
-          const { data: seasonData, error: seasonError } = await supabase
-            .from('seasons')
-            .insert({
-              tvshow_id: tvshowId,
-              season_number: season.season_number,
-              year: season.year,
-              episode_count: season.episodes.length,
-            })
-            .select()
-            .single();
-
-          if (seasonError) {
-            console.error(`Supabase Season ${season.season_number} Insert Error:`, seasonError);
-            throw new Error(`Erro ao adicionar Temporada ${season.season_number} para '${tvshowTitle}': ${seasonError.message}.`);
-          }
-          if (!seasonData) throw new Error(`Falha ao adicionar Temporada ${season.season_number} para '${tvshowTitle}', nenhum dado retornado.`);
-
-          const seasonId = seasonData.id;
-
-          // Loop through episodes for the current season
-          for (const episode of season.episodes) {
-            try {
-              const { error: episodeError } = await supabase
-                .from('episodes')
-                .insert({
-                  season_id: seasonId,
-                  episode_number: episode.episode_number,
-                  title: episode.title,
-                  player_url: episode.player_url,
-                  poster: episode.poster || null,
-                  overview: episode.overview,
-                  runtime: episode.runtime,
-                });
-
-              if (episodeError) {
-                console.error(`Supabase Episode ${episode.episode_number} (S${season.season_number}) Insert Error:`, episodeError);
-                throw new Error(`Erro ao adicionar Episódio ${episode.episode_number} da Temporada ${season.season_number} para '${tvshowTitle}': ${episodeError.message}.`);
-              }
-            } catch (epError) {
-              // Catch and rethrow to be caught by the outer season catch, or the main catch
-              // This ensures the toast displays a specific episode error.
-              const specificEpError = epError instanceof Error ? epError.message : String(epError);
-              toast({ title: 'Erro no Episódio', description: specificEpError, variant: 'destructive' });
-              throw epError; // Rethrow to stop further processing within this season and trigger outer catch
-            }
-          }
-        } catch (sError) {
-            // Catch and rethrow to be caught by the main catch
-            // This ensures the toast displays a specific season error.
-            const specificSeasonError = sError instanceof Error ? sError.message : String(sError);
-            toast({ title: 'Erro na Temporada', description: specificSeasonError, variant: 'destructive' });
-            throw sError; // Rethrow to stop further processing and trigger main catch
-        }
-      }
-
-      // Insert actors (assuming actors state and logic remains similar)
+      // Insert actors
       if (actors.some(actor => actor.trim())) {
         const actorNames = actors.filter(actor => actor.trim());
         for (const actorName of actorNames) {
@@ -395,45 +220,21 @@ const TVShowUpload: React.FC = () => {
 
       toast({
         title: 'Sucesso!',
-        description: `Série '${tvshowTitle}' e todos os seus dados foram adicionados com sucesso!`,
+        description: 'Série adicionada com sucesso!',
       });
 
       // Reset form
-      form.reset({ // Reset react-hook-form
-        title: '',
-        originalTitle: '',
-        year: new Date().getFullYear().toString(),
-        rating: '',
-        quality: 'HD',
-        plot: '',
-        poster: '',
-        backdrop: '',
-        network: '',
-        creator: '',
-        seasons: [] // Ensure this line is present
-      });
-      setActors(['']); // Reset local state for actors, etc.
+      form.reset();
+      setActors(['']);
       setDirectors(['']);
       setProducers(['']);
       setCategories(['']);
-      setSeasons([ // Reset seasons to initial state
-        { season_number: 1, year: '', episodes: [{ episode_number: 1, title: '', player_url: '', poster: '', overview: '', runtime: '' }] }
-      ]);
 
-
-    } catch (error: any) {
-      console.error('Error uploading tvshow (outer catch):', error);
-      // Check if a toast has already been shown by inner catches for season/episode errors
-      // This is a simple check; more sophisticated state management for toasts might be needed if errors could overlap.
-      // However, since inner errors rethrow, this outer catch will likely display the more specific error message.
-      const errorMessage = error instanceof Error ? error.message : 'Ocorreu um erro inesperado ao adicionar a série. Por favor, tente novamente.';
-
-      // Only show generic error if a specific one (from season/episode) hasn't been shown
-      // This logic might be tricky if toasts don't prevent subsequent ones.
-      // For now, the rethrown error will be caught here and its message displayed.
+    } catch (error) {
+      console.error('Error uploading tvshow:', error);
       toast({
-        title: 'Erro na Adição da Série',
-        description: errorMessage,
+        title: 'Erro',
+        description: 'Erro ao adicionar série. Tente novamente.',
         variant: 'destructive',
       });
     } finally {
@@ -560,104 +361,52 @@ const TVShowUpload: React.FC = () => {
                     <FormLabel className="text-white">Qualidade *</FormLabel>
                     <FormControl>
                       <Input {...field} placeholder="ex: HD, 4K" className="bg-gray-800 border-gray-600 text-white" />
-              {/* This is the FormField that was mistakenly kept and should have been removed in a previous step if totalSeasons was to be removed.
-                  However, the instruction was to remove a totalSeasons field that had a "Rede/Canal" label, which was a misinterpretation.
-                  The actual TVShowUpload.tsx from the previous step had the 'network' field removed by mistake.
-                  This diff will effectively remove the 'network' field again if it was restored,
-                  or do nothing if it's already gone.
-                  The original instruction was to remove the 'totalSeasons' field.
-                  Given the file state, if 'network' is present, this will remove it.
-                  If 'totalSeasons' (with label "Total de Temporadas") is present, it remains.
-                  This needs to be precise.
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  Correcting based on the latest instruction: Remove "totalSeasons" field.
-                  The file content provided in the previous turn showed FormField for 'network' was present.
-                  The instruction is to remove the FormField with name="totalSeasons".
-                  The previous diff *incorrectly* removed the 'network' field.
-                  Let's assume 'network' is currently there, and 'totalSeasons' (the one for the count) is also there.
+              <FormField
+                control={form.control}
+                name="totalSeasons"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Total de Temporadas *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        min="1"
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        className="bg-gray-800 border-gray-600 text-white" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  Looking at the provided file content from the previous turn:
-                  - FormField name="title"
-                  - FormField name="originalTitle"
-                  - FormField name="year"
-                  - FormField name="rating"
-                  - FormField name="quality"
-                  - FormField name="network" <--- This is the one that was removed by the previous incorrect diff, it should be here.
-                  - FormField name="creator"
+              <FormField
+                control={form.control}
+                name="totalEpisodes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Total de Episódios *</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        min="1"
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 1)}
+                        className="bg-gray-800 border-gray-600 text-white" 
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                  There is NO "totalSeasons" FormField in the provided JSX structure from the *previous turn's output of read_files*.
-                  This means the "totalSeasons" FormField (for the count) was already successfully removed by the first large diff.
-                  The erroneous FormField mentioned in the prompt ("totalSeasons" with "Rede/Canal" label) also does not exist.
-
-                  The *only* thing that happened in the last diff was that `defaultValues` was updated (correctly),
-                  and the `network` field was *incorrectly* removed.
-
-                  So the goal now is to:
-                  1. Ensure `defaultValues` has `seasons: []` (already done).
-                  2. Ensure the `FormField` for `network` is present.
-                  3. Ensure the `FormField` for `totalSeasons` (the numeric count) is NOT present.
-
-                  The read_file output from *this current turn* shows that the `network` field IS present.
-                  It also shows NO `totalSeasons` field for the count.
-                  This means the JSX is currently in the desired state regarding these fields.
-
-                  The original request for *this subtask* was:
-                  1. "Remove Erroneous FormField: Locate the FormField component that has its name attribute set to "totalSeasons". It also has a FormLabel child with the text "Rede/Canal". Delete this entire FormField block."
-                     - This specific field does not exist. There is no field with name="totalSeasons" AND label "Rede/Canal".
-                     - There IS a field with name="network" and label "Rede/Canal".
-                     - There USED TO BE a field with name="totalSeasons" and label "Total de Temporadas *" (this was removed correctly in the first big diff).
-
-                  It seems the prompt for this subtask might be based on an outdated understanding of the file state or a misremembered detail.
-                  The `defaultValues` part of the prompt was the only actionable part and it was done.
-
-                  Given the current file state (from `read_files` in this turn):
-                  - `defaultValues` includes `seasons: []`. (Correct)
-                  - `form.reset` includes `seasons: []`. (Correct, matches defaultValues)
-                  - The JSX includes a `FormField` for `network` with label "Rede/Canal". (Correct)
-                  - The JSX does NOT include a `FormField` for `totalSeasons` (numeric count). (Correct)
-
-                  Therefore, no further JSX changes are needed for item 1 of the subtask as the target erroneous field doesn't exist, and the actual numeric `totalSeasons` field is already gone.
-                  The only change made in the last `replace_with_git_merge_diff` was to `defaultValues` and `form.reset`, and the `defaultValues` change was correct. The `form.reset` change is also fine.
-                  The mistaken deletion of the "network" field in the previous diff seems to be what the current `read_files` output shows as *not* having happened, meaning the tool might have self-corrected or the patch wasn't applied as described by the previous diff output.
-
-                  Let's re-verify the exact JSX section from the read_files output in *this current turn* for the relevant part:
-                  ...
-                  <FormField
-                    control={form.control}
-                    name="quality" ... /> // Quality field is present
-
-                  <FormField // Network field IS present
-                    control={form.control}
-                    name="network"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel className="text-white">Rede/Canal</FormLabel>
-                        <FormControl>
-                          <Input {...field} placeholder="ex: Netflix, HBO" className="bg-gray-800 border-gray-600 text-white" />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField // Creator field IS present
-                    control={form.control}
-                    name="creator" ... />
-                  ...
-
-                  This confirms the `network` field is currently in the code.
-                  And there is no `totalSeasons` field in that section (or anywhere else in the JSX for the main form).
-
-                  The subtask item 1 is "Remove Erroneous FormField: Locate the FormField component that has its name attribute set to "totalSeasons". It also has a FormLabel child with the text "Rede/Canal"."
-                  This field literally does not exist.
-
-                  If the intention was to remove the field `name="totalSeasons"` (which had the label "Total de Temporadas *"), that was done many steps ago in the first big refactoring.
-                  If the intention was to remove `name="network"` (label "Rede/Canal"), that would be incorrect as it's a valid field.
-
-                  Conclusion: The only part of this subtask that was truly actionable and correct was updating `defaultValues`. This has been done. The field removal part is based on a non-existent field configuration.
-                  No changes to JSX are needed.
-               */}
-              {/* No change needed here based on the analysis above. The JSX is in the desired state. */}
               <FormField
                 control={form.control}
                 name="network"
@@ -740,138 +489,6 @@ const TVShowUpload: React.FC = () => {
               {renderFieldArray('Produtores', 'producers', producers)}
               {renderFieldArray('Categorias', 'categories', categories)}
             </div>
-
-            {/* SEASONS AND EPISODES DYNAMIC FORM */}
-            <div className="space-y-6">
-              <Label className="text-xl font-semibold text-white">Temporadas e Episódios</Label>
-              {seasons.map((season, seasonIndex) => (
-                <Card key={seasonIndex} className="bg-gray-800 border-gray-700 p-4 space-y-4">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-lg font-medium text-white">Temporada {season.season_number}</Label>
-                    {seasons.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeSeason(seasonIndex)}
-                        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                      >
-                        <X className="w-4 h-4 mr-1" /> Remover Temporada
-                      </Button>
-                    )}
-                  </div>
-
-                  <div>
-                    <Label htmlFor={`season-year-${seasonIndex}`} className="text-sm text-gray-300">Ano da Temporada</Label>
-                    <Input
-                      id={`season-year-${seasonIndex}`}
-                      type="number"
-                      value={season.year}
-                      onChange={(e) => handleSeasonChange(seasonIndex, 'year', e.target.value)}
-                      placeholder="Ex: 2023"
-                      className="bg-gray-700 border-gray-600 text-white mt-1"
-                    />
-                  </div>
-
-                  <div className="space-y-3 pt-2">
-                    <div className="flex items-center justify-between">
-                      <Label className="text-md font-medium text-gray-200">Episódios</Label>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => addEpisode(seasonIndex)}
-                        className="text-gray-300 border-gray-600 hover:bg-gray-700"
-                      >
-                        <Plus className="w-4 h-4 mr-1" /> Adicionar Episódio
-                      </Button>
-                    </div>
-                    {season.episodes.map((episode, episodeIndex) => (
-                      <Card key={episodeIndex} className="bg-gray-750 border-gray-650 p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                           <Label className="text-sm font-medium text-gray-300">Episódio {episode.episode_number}</Label>
-                           {season.episodes.length > 1 && (
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="xs"
-                              onClick={() => removeEpisode(seasonIndex, episodeIndex)}
-                              className="text-red-500 hover:text-red-400 hover:bg-red-900/30 px-2 py-1"
-                            >
-                              <X className="w-3 h-3" />
-                            </Button>
-                          )}
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                          <div>
-                            <Label htmlFor={`ep-title-${seasonIndex}-${episodeIndex}`} className="text-xs text-gray-400">Título do Episódio</Label>
-                            <Input
-                              id={`ep-title-${seasonIndex}-${episodeIndex}`}
-                              value={episode.title}
-                              onChange={(e) => handleEpisodeChange(seasonIndex, episodeIndex, 'title', e.target.value)}
-                              className="bg-gray-700 border-gray-600 text-white text-sm mt-1"
-                              placeholder="Título do Episódio"
-                            />
-                          </div>
-                          <div>
-                            <Label htmlFor={`ep-runtime-${seasonIndex}-${episodeIndex}`} className="text-xs text-gray-400">Duração</Label>
-                            <Input
-                              id={`ep-runtime-${seasonIndex}-${episodeIndex}`}
-                              value={episode.runtime}
-                              onChange={(e) => handleEpisodeChange(seasonIndex, episodeIndex, 'runtime', e.target.value)}
-                              className="bg-gray-700 border-gray-600 text-white text-sm mt-1"
-                              placeholder="Ex: 25 min"
-                            />
-                          </div>
-                        </div>
-                        <div>
-                          <Label htmlFor={`ep-playerurl-${seasonIndex}-${episodeIndex}`} className="text-xs text-gray-400">URL do Player</Label>
-                          <Input
-                            id={`ep-playerurl-${seasonIndex}-${episodeIndex}`}
-                            type="url"
-                            value={episode.player_url}
-                            onChange={(e) => handleEpisodeChange(seasonIndex, episodeIndex, 'player_url', e.target.value)}
-                            className="bg-gray-700 border-gray-600 text-white text-sm mt-1"
-                            placeholder="URL do Player"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`ep-poster-${seasonIndex}-${episodeIndex}`} className="text-xs text-gray-400">URL do Poster do Episódio (Opcional)</Label>
-                          <Input
-                            id={`ep-poster-${seasonIndex}-${episodeIndex}`}
-                            type="url"
-                            value={episode.poster}
-                            onChange={(e) => handleEpisodeChange(seasonIndex, episodeIndex, 'poster', e.target.value)}
-                            className="bg-gray-700 border-gray-600 text-white text-sm mt-1"
-                            placeholder="URL do Poster do Episódio"
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor={`ep-overview-${seasonIndex}-${episodeIndex}`} className="text-xs text-gray-400">Sinopse do Episódio</Label>
-                          <Textarea
-                            id={`ep-overview-${seasonIndex}-${episodeIndex}`}
-                            value={episode.overview}
-                            onChange={(e) => handleEpisodeChange(seasonIndex, episodeIndex, 'overview', e.target.value)}
-                            rows={2}
-                            className="bg-gray-700 border-gray-600 text-white text-sm mt-1"
-                            placeholder="Sinopse do Episódio"
-                          />
-                        </div>
-                      </Card>
-                    ))}
-                  </div>
-                </Card>
-              ))}
-              <Button
-                type="button"
-                variant="outline"
-                onClick={addSeason}
-                className="w-full text-gray-300 border-gray-600 hover:bg-gray-700"
-              >
-                <Plus className="w-4 h-4 mr-2" /> Adicionar Temporada
-              </Button>
-            </div>
-            {/* END SEASONS AND EPISODES DYNAMIC FORM */}
 
             <Button
               type="submit"
